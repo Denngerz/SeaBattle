@@ -155,10 +155,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="SeaBattle.cpp" />
+    <ClCompile Include="SeaBattlePlayer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SeaBattle.h" />
+    <ClInclude Include="SeaBattlePlayer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
