@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <sal.h>
 #include "SeaBattlePlayer.h"
 
 class Game
