@@ -30,13 +30,9 @@ public:
     
     void draw();
     
-    bool isEndGame();
-    
-    void getInput();
+    bool isAnyShipsLeft();
     
     void implementHitAtLocation(const int x, const int y);
     
     bool isShootableLocation(const int x, const int y);
-    
-    void logic(SeaBattlePlayer& enemyPlayer);
 };

@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <iostream>
 
-SeaBattlePlayer::SeaBattlePlayer(unsigned int seedValue) : seed(seedValue) {}
+SeaBattlePlayer::SeaBattlePlayer(unsigned int seedValue)
+{
+    seed = seedValue;
+}
 
 void SeaBattlePlayer::generate()
 {
@@ -66,7 +69,6 @@ bool SeaBattlePlayer::canSpawnShipInLocation(const int shipX, const int shipY)
 
 void SeaBattlePlayer::draw()
 {
-    std::cout << "================================================" << std::endl;
     for (int i = 0; i < height; i++)
     {
         for (int j = 0; j < width; j++)
@@ -75,18 +77,11 @@ void SeaBattlePlayer::draw()
         }
         std::cout << std::endl;
     }
-    std::cout << "================================================" << std::endl;
 }
 
-bool SeaBattlePlayer::isEndGame() {
-    return shipsAmmount <= 0;
-}
-
-
-void SeaBattlePlayer::getInput()
+bool SeaBattlePlayer::isAnyShipsLeft()
 {
-    std::cin >> shootX;
-    std::cin >> shootY;
+    return shipsAmmount <= 0;
 }
 
 void SeaBattlePlayer::implementHitAtLocation(const int x, const int y)
@@ -108,9 +103,4 @@ void SeaBattlePlayer::implementHitAtLocation(const int x, const int y)
 bool SeaBattlePlayer::isShootableLocation(const int x, const int y)
 {
     return x < width && y < height && x >= 0 && y >= 0;
-}
-
-void SeaBattlePlayer::logic(SeaBattlePlayer& enemyPlayer)
-{
-    enemyPlayer.implementHitAtLocation(shootX, shootY);
 }
