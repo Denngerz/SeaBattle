@@ -5,12 +5,11 @@
 Game::Game(unsigned int seed1, unsigned int seed2): playerOne(seed1), playerTwo(seed2)
 {
     generatePlayers();
+    activePlayer = &playerOne;
 }
 
-void Game::startGame()
+void Game::startRounds()
 {
-    changeActivePlayer();
-    
     while(!isRoundOver())
     {
         drawActivePlayer();
@@ -18,6 +17,11 @@ void Game::startGame()
         logic();
         changeActivePlayer();
     }
+}
+
+void startGame(Game& game)
+{
+    game.startRounds();
 }
 
 void Game::generatePlayers()

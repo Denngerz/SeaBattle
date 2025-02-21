@@ -1,6 +1,10 @@
 ﻿#pragma once
 #include "SeaBattlePlayer.h"
 
+class Game;
+
+void startGame(Game& game);
+
 class Game
 {
 private:
@@ -15,7 +19,7 @@ private:
 public:
     Game(unsigned int seed1, unsigned int seed2);
     
-    void startGame();
+    void startRounds();
 
     void changeActivePlayer();
     void drawActivePlayer();
