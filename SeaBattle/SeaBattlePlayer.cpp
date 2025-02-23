@@ -15,4 +15,10 @@ void SeaBattlePlayer::applyHitToField(const int hitX, const int hitY)
     field.implementHitAtLocation(hitX, hitY);
 }
 
+void SeaBattlePlayer::drawField()
+{
+    field.draw();
+}
+
+
 

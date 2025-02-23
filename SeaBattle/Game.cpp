@@ -1,20 +1,17 @@
 ﻿#include "Game.h"
-
 #include <iostream>
-
 #include "SeaBattlePlayer.h"
 
 void startGame()
 {
-    
-}
-
-Game::Game()
-{   
+    Game game;
+    game.startRounds();
 }
 
 void Game::startRounds()
 {
+    generate();
+    
     while(!isRoundOver())
     {
         draw();
@@ -25,7 +22,13 @@ void Game::startRounds()
 
 void Game::logic()
 {
-    passivePlayer->applyHitToField(shootX, shootY);
+    shootX --;
+    shootY --;
+    
+    if(areCoordinatesValid(shootX, shootY))
+    {
+        passivePlayer->applyHitToField(shootX, shootY);
+    }
 
     if(!passivePlayer->field.isAnyShipsLeft())
     {
@@ -46,30 +49,58 @@ bool Game::isRoundOver()
 void Game::getInput()
 {
     std::cin >> shootX;
+    
+    if(std::cin.fail())
+    {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return;
+    }
+    
     std::cin >> shootY;
+    
+    if(std::cin.fail())
+    {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+}
+
+void Game::generate()
+{
+    generatePlayers();
+    generatePlayersFields();
 }
 
 void Game::changeActivePlayer()
 {
-    
+    std::swap(activePlayer, passivePlayer);
 }
+
 
 void Game::draw()
 {
-    activePlayer->field.draw();
+    activePlayer->drawField();
 }
 
 void Game::generatePlayers()
 {
-    playerOne = new SeaBattlePlayer(1);
-    playerTwo = new SeaBattlePlayer(2);
+    playerOne = std::make_unique<SeaBattlePlayer>(1);
+    playerTwo = std::make_unique<SeaBattlePlayer>(2);
 
-    activePlayer = playerOne;
-    passivePlayer = playerTwo;
+    activePlayer = playerOne.get();
+    passivePlayer = playerTwo.get();
 }
 
 
+void Game::generatePlayersFields()
+{
+    playerOne->generateBattleField();
+    playerTwo->generateBattleField();
+}
 
-
-
+bool Game::areCoordinatesValid(int x, int y)
+{
+    return passivePlayer->field.canShootAtLocation(x, y);
+}
 

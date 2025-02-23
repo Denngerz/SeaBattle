@@ -1,9 +1,6 @@
 ﻿#pragma once
 
 #include "Field.h"
-#include <vector>
-
-#include "Game.h"
 
 class SeaBattlePlayer
 {
@@ -17,6 +14,5 @@ public:
 
     void applyHitToField(const int hitX, const int hitY);
 
-private:
-   
+    void drawField();
 };

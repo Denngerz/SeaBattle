@@ -18,16 +18,17 @@ void Field::generateField()
     
     for (int i = 0; i < height; i++)
     {
-        std::vector<cell> row(width);
-        for(int j = 0; j < width; j ++)
+        std::vector<cell> row;
+
+        for (int j = 0; j < width; j++)
         {
-            row[j].x = j;
-            row[j].y = i;
-            row[j].symbol = waterSymbol;
+            row.emplace_back(j, i, waterSymbol);
         }
+
         field.push_back(row);
     }
 }
+
 
 void Field::generateShips()
 {
@@ -71,6 +72,11 @@ bool Field::canSpawnShipInLocation(const int shipX, const int shipY)
     return true;
 }
 
+bool Field::canShootAtLocation(int shootX, int shootY)
+{
+    return shootX >= 0 && shootX < width && shootY >= 0 && shootY < height;
+}
+
 void Field::draw()
 {
     for (int i = 0; i < height; i++)
@@ -85,7 +91,7 @@ void Field::draw()
 
 bool Field::isAnyShipsLeft()
 {
-    return shipsAmmount <= 0;
+    return shipsAmmount > 0;
 }
 
 void Field::implementHitAtLocation(const int x, const int y)
