@@ -3,30 +3,33 @@
 
 class Game;
 
-void startGame(Game& game);
+void startGame();
 
 class Game
 {
+
+public:
+    Game();
+    
+    void startRounds();
+    void logic();
+    bool isRoundOver();
+    void getInput();
+
+    void changeActivePlayer();
+    void draw();
+    
 private:
-    SeaBattlePlayer playerOne;
-    SeaBattlePlayer playerTwo;
-    SeaBattlePlayer* activePlayer;
+    SeaBattlePlayer *playerOne;
+    SeaBattlePlayer *playerTwo;
+    SeaBattlePlayer *activePlayer;
+    SeaBattlePlayer *passivePlayer;
     
     void generatePlayers();
     
     int shootX, shootY;
 
-public:
-    Game(unsigned int seed1, unsigned int seed2);
-    
-    void startRounds();
+    bool smbLostAllShips = false;
 
-    void changeActivePlayer();
-    void drawActivePlayer();
-    void getInput();
-
-    void logic();
-    bool isRoundOver();
-    
-    SeaBattlePlayer* getPassivePlayer();
+    bool gameOver;
 };

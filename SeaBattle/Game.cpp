@@ -1,43 +1,46 @@
 ﻿#include "Game.h"
+
 #include <iostream>
+
 #include "SeaBattlePlayer.h"
 
-Game::Game(unsigned int seed1, unsigned int seed2): playerOne(seed1), playerTwo(seed2)
+void startGame()
 {
-    generatePlayers();
-    activePlayer = &playerOne;
+    
+}
+
+Game::Game()
+{   
 }
 
 void Game::startRounds()
 {
     while(!isRoundOver())
     {
-        drawActivePlayer();
+        draw();
         getInput();
         logic();
+    }
+}
+
+void Game::logic()
+{
+    passivePlayer->applyHitToField(shootX, shootY);
+
+    if(!passivePlayer->field.isAnyShipsLeft())
+    {
+        smbLostAllShips = true;
+    }
+
+    if(!passivePlayer->field.smShipGotShot)
+    {
         changeActivePlayer();
     }
 }
 
-void startGame(Game& game)
+bool Game::isRoundOver()
 {
-    game.startRounds();
-}
-
-void Game::generatePlayers()
-{
-    playerOne.generate();
-    playerTwo.generate();
-}
-
-void Game::changeActivePlayer()
-{
-    activePlayer = (activePlayer == &playerOne) ? &playerTwo : &playerOne;
-}
-
-void Game::drawActivePlayer()
-{
-    activePlayer->draw();
+    return smbLostAllShips;
 }
 
 void Game::getInput()
@@ -46,19 +49,23 @@ void Game::getInput()
     std::cin >> shootY;
 }
 
-void Game::logic()
+void Game::changeActivePlayer()
 {
-    getPassivePlayer()->implementHitAtLocation(shootX,shootY);
+    
 }
 
-bool Game::isRoundOver()
+void Game::draw()
 {
-    return activePlayer->isAnyShipsLeft();
+    activePlayer->field.draw();
 }
 
-SeaBattlePlayer* Game::getPassivePlayer()
+void Game::generatePlayers()
 {
-    return (activePlayer == &playerOne) ? &playerTwo : &playerOne;
+    playerOne = new SeaBattlePlayer(1);
+    playerTwo = new SeaBattlePlayer(2);
+
+    activePlayer = playerOne;
+    passivePlayer = playerTwo;
 }
 
 

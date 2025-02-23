@@ -154,11 +154,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Field.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SeaBattlePlayer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Field.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="SeaBattlePlayer.h" />
   </ItemGroup>
