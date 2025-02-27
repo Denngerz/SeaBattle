@@ -3,8 +3,8 @@ bin/
 obj/
 Debug/
 Release/
-.vs/ (Visual Studio-specific)
-CMakeFiles/ (for CMake-based projects)
+.vs/
+CMakeFiles/
 CMakeCache.txt
 Makefile
 
