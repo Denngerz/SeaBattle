@@ -3,27 +3,18 @@
 #include <vector>
 
 struct cell {
-    int x;
-    int y;
-    char symbol;
-
-    cell(int xVal, int yVal, char sym) : x(xVal), y(yVal), symbol(sym) {}
+    bool hasShip;
+    bool wasShot;
 };
 
 class Field
 {
 public:
-    Field(unsigned int seedValue);
-    
-    std::vector<std::vector<cell>> field;
-    const int width = 10;
-    const int height = 10;
+    Field(unsigned int seedValue, int new_width = 10, int new_height = 10);
     
     unsigned int seed;
 
     void generate();
-
-    void draw();
 
     bool isAnyShipsLeft();
 
@@ -34,8 +25,20 @@ public:
     bool smShipGotShot = false;
     
     bool canShootAtLocation(int shootX, int shootY);
+
+    std::vector<std::vector<cell>> getField() const;
+
+    int getHeight() const;
+
+    int getWidth() const;
     
 private:
+    std::vector<std::vector<cell>> field;
+
+    const int width;
+    
+    const int height;
+    
     const char shipSymbol = 'S';
     int shipsAmmount = 10;
 

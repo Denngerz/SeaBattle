@@ -1,7 +1,7 @@
 ﻿#include "Field.h"
 #include <iostream>
 
-Field::Field(unsigned int seedValue)
+Field::Field(unsigned int seedValue, int new_width, int new_height): width(new_width), height(new_height)
 {
     seed = seedValue;
 }
@@ -14,19 +14,7 @@ void Field::generate()
 
 void Field::generateField()
 {
-    field.clear();
-    
-    for (int i = 0; i < height; i++)
-    {
-        std::vector<cell> row;
-
-        for (int j = 0; j < width; j++)
-        {
-            row.emplace_back(j, i, waterSymbol);
-        }
-
-        field.push_back(row);
-    }
+    field.resize(height, std::vector<cell>(width));
 }
 
 
@@ -45,7 +33,7 @@ void Field::generateShips()
             shipY = rand() % height;
         }
 
-        field[shipY][shipX].symbol = shipSymbol; 
+        field[shipY][shipX].hasShip = true; 
     }
 }
 
@@ -63,7 +51,7 @@ bool Field::canSpawnShipInLocation(const int shipX, const int shipY)
     {
         for (int j = minX; j <= maxX; j++)
         {
-            if (field[i][j].symbol == shipSymbol)
+            if (field[i][j].hasShip)
             {
                 return false; 
             }
@@ -77,16 +65,19 @@ bool Field::canShootAtLocation(int shootX, int shootY)
     return shootX >= 0 && shootX < width && shootY >= 0 && shootY < height;
 }
 
-void Field::draw()
+std::vector<std::vector<cell>> Field::getField() const
 {
-    for (int i = 0; i < height; i++)
-    {
-        for (int j = 0; j < width; j++)
-        {
-            std::cout << field[i][j].symbol << " ";
-        }
-        std::cout << std::endl;
-    }
+    return field;
+}
+
+int Field::getHeight() const
+{
+    return height;
+}
+
+int Field::getWidth() const
+{
+    return width;
 }
 
 bool Field::isAnyShipsLeft()
@@ -96,17 +87,17 @@ bool Field::isAnyShipsLeft()
 
 void Field::implementHitAtLocation(const int x, const int y)
 {
-    if(field[y][x].symbol == shipSymbol)
+    if(field[y][x].hasShip)
     {
         shipsAmmount--;
-        field[y][x].symbol = destroyedShipSymbol;
         smShipGotShot = true;
     }
     else
     {
-        field[y][x].symbol = destroyedLocationSymbol;
         smShipGotShot = false;
     }
+
+    field[y][x].wasShot = true;
 }
 
 bool Field::gotHit()
