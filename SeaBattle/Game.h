@@ -3,14 +3,14 @@
 #include <memory>
 
 class SeaBattlePlayer;
-class Game;
 
 void startGame();
 
 class Game
 {
-
 public:
+    Game();
+    
     void startRounds();
     void logic();
     bool isRoundOver();
@@ -22,10 +22,10 @@ public:
     
 private:
     
-    std::unique_ptr<SeaBattlePlayer> playerOne;
-    std::unique_ptr<SeaBattlePlayer> playerTwo;
-    SeaBattlePlayer* activePlayer;
-    SeaBattlePlayer* passivePlayer;
+    std::shared_ptr<SeaBattlePlayer> playerOne;
+    std::shared_ptr<SeaBattlePlayer> playerTwo;
+    std::weak_ptr<SeaBattlePlayer> activePlayer;
+    std::weak_ptr<SeaBattlePlayer> passivePlayer;
     
     void generatePlayers();
     void generatePlayersFields();

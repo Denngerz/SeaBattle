@@ -15,4 +15,10 @@ public:
     void applyHitToField(const int hitX, const int hitY);
 
     void drawField();
+
+    bool canHitAtFieldLocation(int x, int y);
+
+    bool isAnyShipsLeftOnField();
+
+    bool isAnyShipGotShot();
 };

@@ -5,7 +5,11 @@
 void startGame()
 {
     Game game;
-    game.startRounds();
+}
+
+Game::Game()
+{
+    startRounds();
 }
 
 void Game::startRounds()
@@ -22,20 +26,17 @@ void Game::startRounds()
 
 void Game::logic()
 {
-    shootX --;
-    shootY --;
-    
     if(areCoordinatesValid(shootX, shootY))
     {
-        passivePlayer->applyHitToField(shootX, shootY);
+        passivePlayer.lock()->applyHitToField(shootX, shootY);
     }
 
-    if(!passivePlayer->field.isAnyShipsLeft())
+    if(!passivePlayer.lock()->isAnyShipsLeftOnField())
     {
         smbLostAllShips = true;
     }
 
-    if(!passivePlayer->field.smShipGotShot)
+    if(!passivePlayer.lock()->isAnyShipGotShot())
     {
         changeActivePlayer();
     }
@@ -64,6 +65,9 @@ void Game::getInput()
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
+
+    shootX --;
+    shootY --;
 }
 
 void Game::generate()
@@ -80,16 +84,16 @@ void Game::changeActivePlayer()
 
 void Game::draw()
 {
-    activePlayer->drawField();
+    activePlayer.lock()->drawField();
 }
 
 void Game::generatePlayers()
 {
-    playerOne = std::make_unique<SeaBattlePlayer>(1);
-    playerTwo = std::make_unique<SeaBattlePlayer>(2);
+    playerOne = std::make_shared<SeaBattlePlayer>(1);
+    playerTwo = std::make_shared<SeaBattlePlayer>(2);
 
-    activePlayer = playerOne.get();
-    passivePlayer = playerTwo.get();
+    activePlayer = playerOne;
+    passivePlayer = playerTwo;
 }
 
 
@@ -101,6 +105,6 @@ void Game::generatePlayersFields()
 
 bool Game::areCoordinatesValid(int x, int y)
 {
-    return passivePlayer->field.canShootAtLocation(x, y);
+    return passivePlayer.lock()->canHitAtFieldLocation(x, y);
 }
 

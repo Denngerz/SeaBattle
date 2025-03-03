@@ -20,5 +20,20 @@ void SeaBattlePlayer::drawField()
     field.draw();
 }
 
+bool SeaBattlePlayer::canHitAtFieldLocation(int x, int y)
+{
+    return field.canShootAtLocation(x, y);
+}
+
+bool SeaBattlePlayer::isAnyShipsLeftOnField()
+{
+    return field.isAnyShipsLeft();
+}
+
+bool SeaBattlePlayer::isAnyShipGotShot()
+{
+    return field.smShipGotShot;
+}
+
 
 
