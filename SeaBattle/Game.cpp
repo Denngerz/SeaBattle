@@ -4,7 +4,7 @@
 
 const gameMode Game::pvp = {"PVP", 10, 10, '~', 'O', '*', 'X', false, false};
 const gameMode Game::pve = {"PVE", 10, 10, '~', 'O', '*', 'X', true, false};
-const gameMode Game::eve = {"EVE", 9, 9, '~', 'O', '*', 'X', true, true};
+const gameMode Game::eve = {"EVE", 10, 10, '~', 'O', '*', 'X', true, true};
 
 void startGame()
 {
@@ -13,6 +13,8 @@ void startGame()
 
 Game::Game()
 {
+    chooseGameMode();
+    
     startRounds();
 }
 
@@ -42,7 +44,12 @@ void Game::logic()
 
     if(!passivePlayer.lock()->isAnyShipGotShot())
     {
+        activePlayerShootsAgain = false;
         changeActivePlayer();
+    }
+    else
+    {
+        activePlayerShootsAgain = true;
     }
 }
 
@@ -76,7 +83,6 @@ void Game::getInput()
 
 void Game::generate()
 {
-    chooseGameMode();
     generatePlayers();
     generatePlayersFields();
 }
@@ -89,7 +95,23 @@ void Game::changeActivePlayer()
 
 void Game::draw()
 {
-    drawField();
+    if (gameModeSet)
+    {
+        drawField();
+
+        if(activePlayerShootsAgain)
+        {
+            std::cout << "Shoot again: ";
+        }
+        else
+        {
+            std::cout << "Enter shoot location (x, y): ";
+        }
+    }
+    else
+    {
+        std::cout << "Enter the name of the game mode (1 - PVP, 2 - PVE, 3 - EVE): ";
+    }
 }
 
 void Game::generatePlayers()
@@ -112,29 +134,29 @@ void Game::chooseGameMode()
 {
     while(!gameModeSet)
     {
+        draw();
         setWantedGameMode(getWantedGameModeName());
     }
+    
 }
 
 int Game::getWantedGameModeName()
 {
     int gameMode;
-    std::cout << "Enter the name of the game mode (1 - PVP, 2 - PVE, 3 - EVE): ";
-
     std::cin >> gameMode;
+    
     while(std::cin.fail())
     {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cin >> gameMode;
     }
 
     return gameMode;
 }
 
-void Game::setWantedGameMode(int wantedGameModeName)
+void Game::setWantedGameMode(int wantedGameMode)
 {
-    switch(wantedGameModeName)
+    switch(wantedGameMode)
     {
         case 1:
             currentMode = pvp;
@@ -163,7 +185,6 @@ bool Game::areCoordinatesValid(int x, int y)
 void Game::drawField()
 {
     int tempHeight = playerOne->getFieldHeight();
-    int tempWidth = playerOne->getFieldWidth();
     
     for(int i = 0; i < tempHeight; i++)
     {

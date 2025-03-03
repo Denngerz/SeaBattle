@@ -61,8 +61,6 @@ private:
 
     bool smbLostAllShips = false;
 
-    bool gameOver;
-
     bool areCoordinatesValid(int x, int y);
 
     bool gameModeSet = false;
@@ -70,4 +68,6 @@ private:
     void drawField();
 
     void drawCell(cell cell);
+
+    bool activePlayerShootsAgain = false;
 };
