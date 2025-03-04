@@ -70,4 +70,6 @@ private:
     void drawCell(cell cell);
 
     bool activePlayerShootsAgain = false;
+
+    bool wasShotValid = false;
 };

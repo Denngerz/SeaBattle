@@ -62,7 +62,8 @@ bool Field::canSpawnShipInLocation(const int shipX, const int shipY)
 
 bool Field::canShootAtLocation(int shootX, int shootY)
 {
-    return shootX >= 0 && shootX < width && shootY >= 0 && shootY < height;
+    smShipGotShot = false;
+    return shootX >= 0 && shootX < width && shootY >= 0 && shootY < height && !field[shootY][shootX].wasShot;
 }
 
 std::vector<std::vector<cell>> Field::getField() const

@@ -1,10 +1,11 @@
 ﻿#include "Game.h"
 #include <iostream>
+#include "SeaBattleBot.h"
 #include "SeaBattlePlayer.h"
 
 const gameMode Game::pvp = {"PVP", 10, 10, '~', 'O', '*', 'X', false, false};
 const gameMode Game::pve = {"PVE", 10, 10, '~', 'O', '*', 'X', true, false};
-const gameMode Game::eve = {"EVE", 10, 10, '~', 'O', '*', 'X', true, true};
+const gameMode Game::eve = {"EVE", 9, 9, '~', 'O', '*', 'X', true, true};
 
 void startGame()
 {
@@ -35,14 +36,20 @@ void Game::logic()
     if(areCoordinatesValid(shootX, shootY))
     {
         passivePlayer.lock()->applyHitToField(shootX, shootY);
+        wasShotValid = true;
     }
-
+    else
+    {
+        wasShotValid = false;
+    }
+    
     if(!passivePlayer.lock()->isAnyShipsLeftOnField())
     {
         smbLostAllShips = true;
+        drawField();
     }
 
-    if(!passivePlayer.lock()->isAnyShipGotShot())
+    if(!passivePlayer.lock()->isAnyShipGotShot() && wasShotValid)
     {
         activePlayerShootsAgain = false;
         changeActivePlayer();
@@ -60,23 +67,32 @@ bool Game::isRoundOver()
 
 void Game::getInput()
 {
-    std::cin >> shootX;
-    
-    if(std::cin.fail())
+    if(auto botPlayer = std::dynamic_pointer_cast<SeaBattleBot>(activePlayer.lock()))
     {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        return;
+        botPlayer->generateShootLocations();
+        shootX = botPlayer->getShootX();
+        shootY = botPlayer->getShootY();
+    }
+    else
+    {
+        std::cin >> shootX;
+    
+        if(std::cin.fail())
+        {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            return;
+        }
+    
+        std::cin >> shootY;
+    
+        if(std::cin.fail())
+        {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        } 
     }
     
-    std::cin >> shootY;
-    
-    if(std::cin.fail())
-    {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
-
     shootX --;
     shootY --;
 }
@@ -97,15 +113,24 @@ void Game::draw()
 {
     if (gameModeSet)
     {
-        drawField();
+        auto bot = std::dynamic_pointer_cast<SeaBattleBot>(activePlayer.lock());
+        if(true)
+        {
+            std::cout << std::endl;
+            drawField();
 
-        if(activePlayerShootsAgain)
-        {
-            std::cout << "Shoot again: ";
-        }
-        else
-        {
-            std::cout << "Enter shoot location (x, y): ";
+            if(wasShotValid && activePlayerShootsAgain)
+            {
+                std::cout << "Shoot again: ";
+            }
+            else if(!wasShotValid && activePlayerShootsAgain)
+            {
+                std::cout << "Enter valid shoot location: ";
+            }
+            else
+            {
+                std::cout << "Enter shoot location (x, y): ";
+            }
         }
     }
     else
@@ -116,11 +141,29 @@ void Game::draw()
 
 void Game::generatePlayers()
 {
-    playerOne = std::make_shared<SeaBattlePlayer>(1, currentMode.height, currentMode.width);
-    playerTwo = std::make_shared<SeaBattlePlayer>(2, currentMode.height, currentMode.width);
+    if(gameModeSet)
+    {
+        if(currentMode.name == pvp.name)
+        {
+            playerOne = std::make_shared<SeaBattlePlayer>(1, currentMode.height, currentMode.width);
+            playerTwo = std::make_shared<SeaBattlePlayer>(2, currentMode.height, currentMode.width);
+        }
+        
+        if(currentMode.name == pve.name)
+        {
+            playerOne = std::make_shared<SeaBattlePlayer>(1, currentMode.height, currentMode.width);
+            playerTwo = std::make_shared<SeaBattleBot>(2, currentMode.height, currentMode.width);
+        }
+        
+        if(currentMode.name == eve.name)
+        {
+            playerOne = std::make_shared<SeaBattleBot>(1, currentMode.height, currentMode.width);
+            playerTwo = std::make_shared<SeaBattleBot>(2, currentMode.height, currentMode.width);
+        }
 
-    activePlayer = playerOne;
-    passivePlayer = playerTwo;
+        activePlayer = playerOne;
+        passivePlayer = playerTwo;
+    }
 }
 
 
@@ -137,7 +180,6 @@ void Game::chooseGameMode()
         draw();
         setWantedGameMode(getWantedGameModeName());
     }
-    
 }
 
 int Game::getWantedGameModeName()
@@ -184,13 +226,24 @@ bool Game::areCoordinatesValid(int x, int y)
 
 void Game::drawField()
 {
+    std::cout << std::endl;
     int tempHeight = playerOne->getFieldHeight();
+    int tempWidth = playerOne->getFieldWidth();
     
     for(int i = 0; i < tempHeight; i++)
     {
         if(currentMode.showFirstPlayerField)
         {
             std::vector<std::vector<cell>> field1 = playerOne->getFieldVector();
+            
+            if(i+1 < 10)
+            {
+                std::cout << i + 1 << "  ";
+            }
+            else
+            {
+                std::cout << i + 1 << " ";
+            }   
             
             for(auto cell: field1[i])
             {
@@ -199,16 +252,32 @@ void Game::drawField()
             }
         }
 
-        std::cout << "\t";
+        std::cout << "   ";
 
         if(currentMode.showSecondPlayerField)
         {
             std::vector<std::vector<cell>> field2 = playerTwo->getFieldVector();
+
+            if(i+1 < 10)
+            {
+                std::cout << i + 1 << "  ";
+            }
+            else
+            {
+                std::cout << i + 1 << " ";
+            }
             
             for(auto cell: field2[i])
             {
                 drawCell(cell);
-                std::cout << " ";
+                if(i >= 10)
+                {
+                    std::cout << "  ";
+                }
+                else
+                {
+                    std::cout << " ";
+                }
             }
         }
 

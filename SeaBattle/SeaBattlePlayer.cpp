@@ -1,6 +1,6 @@
 ﻿#include "SeaBattlePlayer.h"
 
-SeaBattlePlayer::SeaBattlePlayer(unsigned int seedValue, int field_height, int field_width): field(seedValue, field_height, field_width)
+SeaBattlePlayer::SeaBattlePlayer(unsigned int seedValue, int field_height, int field_width): field(seedValue, field_width, field_height)
 {
 }
 

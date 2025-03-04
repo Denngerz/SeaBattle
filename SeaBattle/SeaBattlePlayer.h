@@ -8,6 +8,8 @@ class SeaBattlePlayer
 public:
     SeaBattlePlayer(unsigned int seedValue, int field_height = 10, int field_width = 10);
 
+    virtual ~SeaBattlePlayer() {}
+
     Field field;
 
     void generateBattleField();
