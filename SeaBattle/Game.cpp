@@ -5,7 +5,7 @@
 
 const gameMode Game::pvp = {"PVP", 10, 10, '~', 'O', '*', 'X', false, false};
 const gameMode Game::pve = {"PVE", 10, 10, '~', 'O', '*', 'X', true, false};
-const gameMode Game::eve = {"EVE", 9, 9, '~', 'O', '*', 'X', true, true};
+const gameMode Game::eve = {"EVE", 10, 10, '~', 'O', '*', 'X', true, true};
 
 void startGame()
 {
@@ -108,7 +108,6 @@ void Game::changeActivePlayer()
     std::swap(activePlayer, passivePlayer);
 }
 
-
 void Game::draw()
 {
     if (gameModeSet)
@@ -117,7 +116,6 @@ void Game::draw()
         if(true)
         {
             std::cout << std::endl;
-            drawField();
 
             if(wasShotValid && activePlayerShootsAgain)
             {
@@ -129,6 +127,7 @@ void Game::draw()
             }
             else
             {
+                drawField();
                 std::cout << "Enter shoot location (x, y): ";
             }
         }
@@ -165,7 +164,6 @@ void Game::generatePlayers()
         passivePlayer = playerTwo;
     }
 }
-
 
 void Game::generatePlayersFields()
 {
@@ -221,14 +219,35 @@ void Game::setWantedGameMode(int wantedGameMode)
 
 bool Game::areCoordinatesValid(int x, int y)
 {
-    return passivePlayer.lock()->canHitAtFieldLocation(x, y);
+    return passivePlayer.lock() ->canHitAtFieldLocation(x, y);
 }
 
 void Game::drawField()
 {
-    std::cout << std::endl;
     int tempHeight = playerOne->getFieldHeight();
     int tempWidth = playerOne->getFieldWidth();
+
+    std::cout << std::endl;
+    
+    if(currentMode.showFirstPlayerField)
+    {
+        std::cout<< "   ";
+        for (int i = 0; i < tempWidth; i++)
+        {
+            std::cout << i + 1 << " ";
+        }
+    }
+
+    if(currentMode.showSecondPlayerField)
+    {
+        std::cout<< "     ";
+        for (int i = 0; i < tempWidth; i++)
+        {
+            std::cout << i + 1 << " ";
+        }
+    }
+
+    std::cout << std::endl;
     
     for(int i = 0; i < tempHeight; i++)
     {
@@ -236,7 +255,7 @@ void Game::drawField()
         {
             std::vector<std::vector<cell>> field1 = playerOne->getFieldVector();
             
-            if(i+1 < 10)
+            if(i + 1 < 10)
             {
                 std::cout << i + 1 << "  ";
             }
@@ -245,9 +264,9 @@ void Game::drawField()
                 std::cout << i + 1 << " ";
             }   
             
-            for(auto cell: field1[i])
+            for(int j = 0; j < tempWidth; j++)
             {
-                drawCell(cell);
+                drawCell(field1[i][j]);
                 std::cout << " ";
             }
         }
@@ -267,9 +286,9 @@ void Game::drawField()
                 std::cout << i + 1 << " ";
             }
             
-            for(auto cell: field2[i])
+            for(int j = 0; j < tempWidth; j++)
             {
-                drawCell(cell);
+                drawCell(field2[i][j]);
                 if(i >= 10)
                 {
                     std::cout << "  ";
@@ -280,7 +299,7 @@ void Game::drawField()
                 }
             }
         }
-
+        
         std::cout << std::endl;
     }
 }
