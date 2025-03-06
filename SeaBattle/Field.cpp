@@ -22,7 +22,7 @@ void Field::generateShips()
 {
     srand(seed);
     
-    for (int i = 0; i < shipsAmmount; ++i)
+    for (int i = 0; i < initialShipsAmmount; ++i)
     {
         int shipX = rand() % width;
         int shipY = rand() % height;
@@ -33,11 +33,12 @@ void Field::generateShips()
             shipY = rand() % height;
         }
 
-        field[shipY][shipX].hasShip = true; 
+        field[shipY][shipX].hasShip = true;
+        shipsAmmount++;
     }
 }
 
-bool Field::canSpawnShipInLocation(const int shipX, const int shipY)
+bool Field::canSpawnShipInLocation(const int shipX, const int shipY) const
 {
     int radius = 1;
 
@@ -71,6 +72,11 @@ std::vector<std::vector<cell>> Field::getField() const
     return field;
 }
 
+cell Field::getCellAt(int x, int y) const
+{
+    return field[y][x];
+}
+
 int Field::getHeight() const
 {
     return height;
@@ -81,7 +87,7 @@ int Field::getWidth() const
     return width;
 }
 
-bool Field::isAnyShipsLeft()
+bool Field::isAnyShipsLeft() const
 {
     return shipsAmmount > 0;
 }
@@ -101,7 +107,7 @@ void Field::implementHitAtLocation(const int x, const int y)
     field[y][x].wasShot = true;
 }
 
-bool Field::gotHit()
+bool Field::gotHit() const
 {
     return smShipGotShot;
 }

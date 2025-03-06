@@ -1,11 +1,12 @@
 ﻿#include "Game.h"
 #include <iostream>
+#include "Field.h"
 #include "SeaBattleBot.h"
 #include "SeaBattlePlayer.h"
 
-const gameMode Game::pvp = {"PVP", 10, 10, '~', 'O', '*', 'X', false, false};
-const gameMode Game::pve = {"PVE", 10, 10, '~', 'O', '*', 'X', true, false};
-const gameMode Game::eve = {"EVE", 10, 10, '~', 'O', '*', 'X', true, true};
+const gameMode Game::pvp = {gamemodeNames::PVP};
+const gameMode Game::pve = {gamemodeNames::PVE};
+const gameMode Game::eve = {gamemodeNames::EVE};
 
 void startGame()
 {
@@ -14,13 +15,12 @@ void startGame()
 
 Game::Game()
 {
-    chooseGameMode();
-    
     startRounds();
 }
 
 void Game::startRounds()
 {
+    initialize();
     generate();
     
     while(!isRoundOver())
@@ -103,6 +103,56 @@ void Game::generate()
     generatePlayersFields();
 }
 
+void Game::initialize()
+{
+    chooseGameMode();
+
+    if(currentMode.name == gamemodeNames::PVP)
+    {
+        waterSymbol = '.';
+
+        shipSymbol = '0';
+
+        destroyedShipSymbol = 'X';
+
+        destroyedWaterSymbol = '~';
+
+        showFirstPlayerField = false; 
+
+        showSecondPlayerField = false; 
+    }
+
+    if(currentMode.name == gamemodeNames::PVE)
+    {
+        waterSymbol = '.';
+
+        shipSymbol = '0';
+
+        destroyedShipSymbol = 'X';
+
+        destroyedWaterSymbol = '~';
+
+        showFirstPlayerField = true; 
+
+        showSecondPlayerField = false; 
+    }
+
+    if(currentMode.name == gamemodeNames::EVE)
+    {
+        waterSymbol = '.';
+
+        shipSymbol = '0';
+
+        destroyedShipSymbol = 'X';
+
+        destroyedWaterSymbol = '~';
+
+        showFirstPlayerField = true; 
+
+        showSecondPlayerField = true; 
+    }
+}
+
 void Game::changeActivePlayer()
 {
     std::swap(activePlayer, passivePlayer);
@@ -119,6 +169,7 @@ void Game::draw()
 
             if(wasShotValid && activePlayerShootsAgain)
             {
+                drawField();
                 std::cout << "Shoot again: ";
             }
             else if(!wasShotValid && activePlayerShootsAgain)
@@ -128,6 +179,7 @@ void Game::draw()
             else
             {
                 drawField();
+                std::cout << "Player's " << activePlayer.lock()->id << " turn"<< std::endl;
                 std::cout << "Enter shoot location (x, y): ";
             }
         }
@@ -144,20 +196,20 @@ void Game::generatePlayers()
     {
         if(currentMode.name == pvp.name)
         {
-            playerOne = std::make_shared<SeaBattlePlayer>(1, currentMode.height, currentMode.width);
-            playerTwo = std::make_shared<SeaBattlePlayer>(2, currentMode.height, currentMode.width);
+            playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10, 1);
+            playerTwo = std::make_shared<SeaBattlePlayer>(2, 10, 10, 2);
         }
         
         if(currentMode.name == pve.name)
         {
-            playerOne = std::make_shared<SeaBattlePlayer>(1, currentMode.height, currentMode.width);
-            playerTwo = std::make_shared<SeaBattleBot>(2, currentMode.height, currentMode.width);
+            playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10, 1);
+            playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, 2);
         }
         
         if(currentMode.name == eve.name)
         {
-            playerOne = std::make_shared<SeaBattleBot>(1, currentMode.height, currentMode.width);
-            playerTwo = std::make_shared<SeaBattleBot>(2, currentMode.height, currentMode.width);
+            playerOne = std::make_shared<SeaBattleBot>(1, 10, 10, 1);
+            playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, 2);
         }
 
         activePlayer = playerOne;
@@ -168,7 +220,12 @@ void Game::generatePlayers()
 void Game::generatePlayersFields()
 {
     playerOne->generateBattleField();
+
+    playerOneField = playerOne->field.get();
+    
     playerTwo->generateBattleField();
+
+    playerTwoField = playerTwo->field.get();
 }
 
 void Game::chooseGameMode()
@@ -229,74 +286,58 @@ void Game::drawField()
 
     std::cout << std::endl;
     
-    if(currentMode.showFirstPlayerField)
+    std::cout<< "   ";
+    for (int i = 0; i < tempWidth; i++)
     {
-        std::cout<< "   ";
-        for (int i = 0; i < tempWidth; i++)
-        {
-            std::cout << i + 1 << " ";
-        }
+        std::cout << i + 1 << " ";
     }
-
-    if(currentMode.showSecondPlayerField)
+    
+    std::cout<< "     ";
+    for (int i = 0; i < tempWidth; i++)
     {
-        std::cout<< "     ";
-        for (int i = 0; i < tempWidth; i++)
-        {
-            std::cout << i + 1 << " ";
-        }
+        std::cout << i + 1 << " ";
     }
 
     std::cout << std::endl;
     
     for(int i = 0; i < tempHeight; i++)
     {
-        if(currentMode.showFirstPlayerField)
+        if(i + 1 < 10)
         {
-            std::vector<std::vector<cell>> field1 = playerOne->getFieldVector();
+            std::cout << i + 1 << "  ";
+        }
+        else
+        {
+            std::cout << i + 1 << " ";
+        }   
             
-            if(i + 1 < 10)
-            {
-                std::cout << i + 1 << "  ";
-            }
-            else
-            {
-                std::cout << i + 1 << " ";
-            }   
-            
-            for(int j = 0; j < tempWidth; j++)
-            {
-                drawCell(field1[i][j]);
-                std::cout << " ";
-            }
+        for(int j = 0; j < tempWidth; j++)
+        {
+            drawCell(playerOneField->getCellAt(j, i), showFirstPlayerField);
+            std::cout << " ";
         }
 
         std::cout << "   ";
 
-        if(currentMode.showSecondPlayerField)
+        if(i+1 < 10)
         {
-            std::vector<std::vector<cell>> field2 = playerTwo->getFieldVector();
-
-            if(i+1 < 10)
+            std::cout << i + 1 << "  ";
+        }
+        else
+        {
+            std::cout << i + 1 << " ";
+        }
+            
+        for(int j = 0; j < tempWidth; j++)
+        {
+            drawCell(playerTwoField->getCellAt(j, i), showSecondPlayerField);
+            if(i >= 10)
             {
-                std::cout << i + 1 << "  ";
+                std::cout << "  ";
             }
             else
             {
-                std::cout << i + 1 << " ";
-            }
-            
-            for(int j = 0; j < tempWidth; j++)
-            {
-                drawCell(field2[i][j]);
-                if(i >= 10)
-                {
-                    std::cout << "  ";
-                }
-                else
-                {
-                    std::cout << " ";
-                }
+                std::cout << " ";
             }
         }
         
@@ -304,23 +345,41 @@ void Game::drawField()
     }
 }
 
-void Game::drawCell(cell cell)
+void Game::drawCell(cell cell, bool isVisible)
 {
-    if(cell.hasShip && !cell.wasShot)
+    if(isVisible)
     {
-        std::cout << currentMode.shipSymbol;
-    }
-    else if(cell.hasShip && cell.wasShot)
-    {
-        std::cout << currentMode.destroyedShipSymbol;
-    }
-    else if(cell.wasShot && !cell.hasShip)
-    {
-        std::cout << currentMode.destroyedLocationSymbol;
+        if(!cell.hasShip && !cell.wasShot)
+        {
+            std::cout << waterSymbol;
+        }
+        if(cell.hasShip&& !cell.wasShot)
+        {
+            std::cout << shipSymbol;
+        }
+        if(!cell.hasShip&& cell.wasShot)
+        {
+            std::cout << destroyedWaterSymbol;
+        }
+        if(cell.hasShip&& cell.wasShot)
+        {
+            std::cout << destroyedShipSymbol;
+        }
     }
     else
     {
-        std::cout << currentMode.waterSymbol;
+        if(cell.hasShip && cell.wasShot)
+        {
+            std::cout << destroyedShipSymbol;
+        }
+        if(!cell.hasShip&& cell.wasShot)
+        {
+            std::cout << destroyedWaterSymbol;
+        }
+        else
+        {
+            std::cout << waterSymbol;
+        }
     }
 }
 

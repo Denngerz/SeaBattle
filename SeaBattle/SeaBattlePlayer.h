@@ -1,16 +1,22 @@
 ﻿#pragma once
 
-#include "Field.h"
+#include <memory>
+#include <vector>
+
+class Field;
+struct cell;
 
 class SeaBattlePlayer
 {
 
 public:
-    SeaBattlePlayer(unsigned int seedValue, int field_height = 10, int field_width = 10);
+    SeaBattlePlayer(unsigned int seedValue, int field_height = 10, int field_width = 10, int i = 0);
 
     virtual ~SeaBattlePlayer() {}
 
-    Field field;
+    int id;
+
+    std::unique_ptr<Field> field;
 
     void generateBattleField();
 
@@ -18,13 +24,13 @@ public:
 
     bool canHitAtFieldLocation(int x, int y);
 
-    bool isAnyShipsLeftOnField();
+    bool isAnyShipsLeftOnField() const;
 
-    bool isAnyShipGotShot();
+    bool isAnyShipGotShot() const;
 
-    int getFieldHeight();
+    int getFieldHeight() const;
 
-    int getFieldWidth();
+    int getFieldWidth() const;
 
     std::vector<std::vector<cell>> getFieldVector() const;
 };

@@ -1,9 +1,10 @@
 ﻿#include "SeaBattleBot.h"
+#include "Field.h"
 
 void SeaBattleBot::generateShootLocations()
 {
-    shootX = rand() % field.getWidth() + 1;
-    shootY = rand() % field.getHeight() + 1;
+    shootX = rand() % field->getWidth() + 1;
+    shootY = rand() % field->getHeight() + 1;
 }
 
 int SeaBattleBot::getShootX() const

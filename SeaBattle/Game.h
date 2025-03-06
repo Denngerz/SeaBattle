@@ -1,24 +1,25 @@
 ﻿#pragma once
 
 #include <memory>
-#include <string>
 
 class SeaBattlePlayer;
 
-void startGame();
+class Field;
 
 struct cell;
 
+void startGame();
+
+enum gamemodeNames
+{
+    PVP,
+    PVE,
+    EVE
+};
+
 struct gameMode
 {
-    std::string name;
-    
-    //Field
-    int width, height;
-    char waterSymbol, shipSymbol, destroyedLocationSymbol, destroyedShipSymbol;
-
-    //Draw
-    bool showFirstPlayerField, showSecondPlayerField;
+    gamemodeNames name;
 };
 
 class Game
@@ -31,6 +32,7 @@ public:
     bool isRoundOver();
     void getInput();
     void generate();
+    void initialize();
 
     void changeActivePlayer();
     void draw();
@@ -45,6 +47,10 @@ private:
     
     std::shared_ptr<SeaBattlePlayer> playerOne;
     std::shared_ptr<SeaBattlePlayer> playerTwo;
+
+    Field* playerOneField;
+    Field* playerTwoField;
+    
     std::weak_ptr<SeaBattlePlayer> activePlayer;
     std::weak_ptr<SeaBattlePlayer> passivePlayer;
 
@@ -67,9 +73,21 @@ private:
 
     void drawField();
 
-    void drawCell(cell cell);
+    void drawCell(cell cell, bool isVisible);
 
     bool activePlayerShootsAgain = false;
 
     bool wasShotValid = false;
+
+    char waterSymbol;
+
+    char shipSymbol;
+
+    char destroyedShipSymbol;
+
+    char destroyedWaterSymbol;
+
+    bool showFirstPlayerField;
+
+    bool showSecondPlayerField;
 };

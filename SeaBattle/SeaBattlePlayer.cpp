@@ -1,47 +1,49 @@
 ﻿#include "SeaBattlePlayer.h"
+#include "Field.h"
 
-SeaBattlePlayer::SeaBattlePlayer(unsigned int seedValue, int field_height, int field_width): field(seedValue, field_width, field_height)
+SeaBattlePlayer::SeaBattlePlayer(unsigned int seedValue, int field_height, int field_width, int id): id(id)
 {
+    field = std::make_unique<Field>(seedValue, field_width, field_height);
 }
 
 void SeaBattlePlayer::generateBattleField()
 {
-    field.generate();
+    field->generate();
 }
 
 void SeaBattlePlayer::applyHitToField(const int hitX, const int hitY)
 {
-    field.implementHitAtLocation(hitX, hitY);
+    field->implementHitAtLocation(hitX, hitY);
 }
 
 bool SeaBattlePlayer::canHitAtFieldLocation(int x, int y)
 {
-    return field.canShootAtLocation(x, y);
+    return field->canShootAtLocation(x, y);
 }
 
-bool SeaBattlePlayer::isAnyShipsLeftOnField()
+bool SeaBattlePlayer::isAnyShipsLeftOnField() const
 {
-    return field.isAnyShipsLeft();
+    return field->isAnyShipsLeft();
 }
 
-bool SeaBattlePlayer::isAnyShipGotShot()
+bool SeaBattlePlayer::isAnyShipGotShot() const
 {
-    return field.smShipGotShot;
+    return field->smShipGotShot;
 }
 
-int SeaBattlePlayer::getFieldHeight()
+int SeaBattlePlayer::getFieldHeight() const
 {
-    return field.getHeight();
+    return field->getHeight();
 }
 
-int SeaBattlePlayer::getFieldWidth()
+int SeaBattlePlayer::getFieldWidth() const
 {
-    return field.getWidth();
+    return field->getWidth();
 }
 
 std::vector<std::vector<cell>> SeaBattlePlayer::getFieldVector() const
 {
-    return field.getField();
+    return field->getField();
 }
 
 

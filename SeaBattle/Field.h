@@ -16,17 +16,19 @@ public:
 
     void generate();
 
-    bool isAnyShipsLeft();
+    bool isAnyShipsLeft() const;
 
     void implementHitAtLocation(const int x, const int y);
 
-    bool gotHit();
+    bool gotHit() const;
     
     bool smShipGotShot = false;
     
     bool canShootAtLocation(int shootX, int shootY);
 
     std::vector<std::vector<cell>> getField() const;
+
+    cell getCellAt(int x, int y) const;
 
     int getHeight() const;
 
@@ -39,16 +41,12 @@ private:
     
     const int height;
     
-    const char shipSymbol = 'S';
-    int shipsAmmount = 10;
+    int shipsAmmount;
 
-    const char waterSymbol = '.';
-    
-    const char destroyedLocationSymbol = '#';
-    const char destroyedShipSymbol = 'D';
+    int initialShipsAmmount = 10;
 
     void generateField();
     void generateShips();
 
-    bool canSpawnShipInLocation(const int shipX, const int shipY);
+    bool canSpawnShipInLocation(const int shipX, const int shipY) const;
 };
