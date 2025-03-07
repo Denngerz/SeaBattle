@@ -16,7 +16,7 @@ void SeaBattlePlayer::applyHitToField(const int hitX, const int hitY)
     field->implementHitAtLocation(hitX, hitY);
 }
 
-bool SeaBattlePlayer::canHitAtFieldLocation(int x, int y)
+bool SeaBattlePlayer::canHitAtFieldLocation(int x, int y) const
 {
     return field->canShootAtLocation(x, y);
 }

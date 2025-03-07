@@ -1,5 +1,6 @@
 ﻿#include "Game.h"
 #include <iostream>
+#include <iomanip>
 #include "Field.h"
 #include "SeaBattleBot.h"
 #include "SeaBattlePlayer.h"
@@ -194,19 +195,19 @@ void Game::generatePlayers()
 {
     if(gameModeSet)
     {
-        if(currentMode.name == pvp.name)
+        if(currentMode.name == gamemodeNames::PVP)
         {
             playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10, 1);
             playerTwo = std::make_shared<SeaBattlePlayer>(2, 10, 10, 2);
         }
         
-        if(currentMode.name == pve.name)
+        if(currentMode.name == gamemodeNames::PVE)
         {
             playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10, 1);
             playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, 2);
         }
         
-        if(currentMode.name == eve.name)
+        if(currentMode.name == gamemodeNames::EVE)
         {
             playerOne = std::make_shared<SeaBattleBot>(1, 10, 10, 1);
             playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, 2);
@@ -276,7 +277,7 @@ void Game::setWantedGameMode(int wantedGameMode)
 
 bool Game::areCoordinatesValid(int x, int y)
 {
-    return passivePlayer.lock() ->canHitAtFieldLocation(x, y);
+    return passivePlayer.lock()->canHitAtFieldLocation(x, y);
 }
 
 void Game::drawField()
@@ -370,7 +371,7 @@ void Game::drawCell(cell cell, bool isVisible)
     {
         if(cell.hasShip && cell.wasShot)
         {
-            std::cout << destroyedShipSymbol;
+            std::cout <<  destroyedShipSymbol;
         }
         if(!cell.hasShip&& cell.wasShot)
         {

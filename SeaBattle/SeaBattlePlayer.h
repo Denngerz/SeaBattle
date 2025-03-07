@@ -22,7 +22,7 @@ public:
 
     void applyHitToField(const int hitX, const int hitY);
 
-    bool canHitAtFieldLocation(int x, int y);
+    bool canHitAtFieldLocation(int x, int y) const;
 
     bool isAnyShipsLeftOnField() const;
 

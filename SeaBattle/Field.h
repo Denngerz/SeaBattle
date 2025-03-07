@@ -19,8 +19,6 @@ public:
     bool isAnyShipsLeft() const;
 
     void implementHitAtLocation(const int x, const int y);
-
-    bool gotHit() const;
     
     bool smShipGotShot = false;
     
@@ -46,7 +44,8 @@ private:
     int initialShipsAmmount = 10;
 
     void generateField();
-    void generateShips();
+    
+    void tryGenerateShips();
 
     bool canSpawnShipInLocation(const int shipX, const int shipY) const;
 };

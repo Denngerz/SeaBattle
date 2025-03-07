@@ -9,7 +9,7 @@ Field::Field(unsigned int seedValue, int new_width, int new_height): width(new_w
 void Field::generate()
 {
     generateField();
-    generateShips();
+    tryGenerateShips();
 }
 
 void Field::generateField()
@@ -18,7 +18,7 @@ void Field::generateField()
 }
 
 
-void Field::generateShips()
+void Field::tryGenerateShips()
 {
     srand(seed);
     
@@ -26,15 +26,41 @@ void Field::generateShips()
     {
         int shipX = rand() % width;
         int shipY = rand() % height;
+
+        int counter = 0;
+        bool wasAbleToSpawn = true;
         
         while (!canSpawnShipInLocation(shipX, shipY))
         {
             shipX = rand() % width;
             shipY = rand() % height;
+
+            counter++;
+            
+            if(counter >= 20)
+            {
+                wasAbleToSpawn = false;
+                for(int l = 0; l < height; ++l)
+                {
+                    for(int j = 0; j < width; ++j)
+                    {
+                        if(canSpawnShipInLocation(j,l))
+                        {
+                            shipX = j;
+                            shipY = l;
+                            
+                            wasAbleToSpawn = true;
+                        }
+                    }
+                }
+            }
         }
 
-        field[shipY][shipX].hasShip = true;
-        shipsAmmount++;
+        if(wasAbleToSpawn)
+        {
+            field[shipY][shipX].hasShip = true;
+            shipsAmmount++;
+        }
     }
 }
 
@@ -42,11 +68,17 @@ bool Field::canSpawnShipInLocation(const int shipX, const int shipY) const
 {
     int radius = 1;
 
-    int minX = (shipX - radius) >= 0 ? shipX - radius : 0;
-    int maxX = (shipX + radius) <= (width - 1) ? shipX + radius : width - 1;
+    int minXValue = shipX - radius;
+    int maxXValue = shipX + radius;
 
-    int minY = (shipY - radius) >= 0 ? shipY - radius : 0;
-    int maxY = (shipY + radius) <= (height - 1) ? shipY + radius : height - 1;
+    int minYValue = shipY - radius;
+    int maxYValue = shipY + radius;
+    
+    int minX = (minXValue) >= 0 ? minXValue : 0;
+    int maxX = (maxXValue) <= (width - 1) ? maxXValue : width - 1;
+
+    int minY = (minYValue) >= 0 ? minYValue : 0;
+    int maxY = (maxYValue) <= (height - 1) ? maxYValue : height - 1;
 
     for (int i = minY; i <= maxY; i++)
     {
@@ -63,8 +95,12 @@ bool Field::canSpawnShipInLocation(const int shipX, const int shipY) const
 
 bool Field::canShootAtLocation(int shootX, int shootY)
 {
-    smShipGotShot = false;
-    return shootX >= 0 && shootX < width && shootY >= 0 && shootY < height && !field[shootY][shootX].wasShot;
+    if(shootX >= 0 && shootX < width && shootY >= 0 && shootY < height)
+    {
+        return !field[shootY][shootX].wasShot;
+    }
+    
+    return false;
 }
 
 std::vector<std::vector<cell>> Field::getField() const
@@ -94,23 +130,17 @@ bool Field::isAnyShipsLeft() const
 
 void Field::implementHitAtLocation(const int x, const int y)
 {
+    smShipGotShot = false;
+    
     if(field[y][x].hasShip)
     {
         shipsAmmount--;
         smShipGotShot = true;
     }
-    else
-    {
-        smShipGotShot = false;
-    }
 
     field[y][x].wasShot = true;
 }
 
-bool Field::gotHit() const
-{
-    return smShipGotShot;
-}
 
 
 
