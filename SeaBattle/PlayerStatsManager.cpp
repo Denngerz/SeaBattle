@@ -142,11 +142,28 @@ void PlayerStatsManager::updatePlayerStats(std::string username, bool didPlayerW
 
     for (auto& player : playerStats["players"]) {
         if (player["username"] == username) {
+            
+            int currentMMR = player["MMR"];
+            int lost = player["Lost"];
+            int won = player["Won"];
+            
             if(didPlayerWin)
             {
-                double bonusMMR = 5 * (1 - (ammountOfMoves / fieldSize));
-                int currentMMR = player["MMR"];
+                double bonusMMR = basicMMRModifier + 5 * (1 - (ammountOfMoves / fieldSize));
+                
                 player["MMR"] = static_cast<int>(round(currentMMR + bonusMMR));
+                player["Won"] = won + 1;
+                player["WinRate"] = won / lost;
+                
+                isUpdated = true;
+                break;
+            }
+            else
+            {
+                player["MMR"] = basicMMRModifier + currentMMR;
+                player["Lost"] = lost + 1;
+                player["WinRate"] = won / lost;
+                
                 isUpdated = true;
                 break;
             }
@@ -164,7 +181,7 @@ bool PlayerStatsManager::isPasswordRight(std::string username, std::string passw
     LoadStats();
     
     for (auto& player : playerStats["players"]) {
-        if (player["password"] == password) {
+        if (player["password"] == password && player["username"] == username) {
             return true;
         }
     }

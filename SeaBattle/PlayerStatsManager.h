@@ -25,4 +25,6 @@ private:
     void PlayerStatsManager::LoadStats();
 
     void PlayerStatsManager::SaveStats(const nlohmann::json& data);
+
+    int basicMMRModifier = 20;
 };
