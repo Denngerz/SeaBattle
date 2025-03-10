@@ -36,7 +36,7 @@ void Game::logic()
 {
     if(areCoordinatesValid(shootX, shootY))
     {
-        passivePlayer.lock()->applyHitToField(shootX, shootY);
+        passivePlayerField->implementHitAtLocation(shootX, shootY);
         wasShotValid = true;
     }
     else
@@ -44,13 +44,13 @@ void Game::logic()
         wasShotValid = false;
     }
     
-    if(!passivePlayer.lock()->isAnyShipsLeftOnField())
+    if(!passivePlayerField->isAnyShipsLeft())
     {
         smbLostAllShips = true;
         drawField();
     }
 
-    if(!passivePlayer.lock()->isAnyShipGotShot() && wasShotValid)
+    if(!passivePlayerField->smShipGotShot && wasShotValid)
     {
         activePlayerShootsAgain = false;
         changeActivePlayer();
@@ -110,29 +110,13 @@ void Game::initialize()
 
     if(currentMode.name == GamemodeNames::PVP)
     {
-        waterSymbol = '.';
+        showFirstPlayerField = false;
 
-        shipSymbol = '0';
-
-        destroyedShipSymbol = 'X';
-
-        destroyedWaterSymbol = '~';
-
-        showFirstPlayerField = false; 
-
-        showSecondPlayerField = false; 
+        showSecondPlayerField = false;
     }
 
     if(currentMode.name == GamemodeNames::PVE)
     {
-        waterSymbol = '.';
-
-        shipSymbol = '0';
-
-        destroyedShipSymbol = 'X';
-
-        destroyedWaterSymbol = '~';
-
         showFirstPlayerField = true; 
 
         showSecondPlayerField = false; 
@@ -140,14 +124,6 @@ void Game::initialize()
 
     if(currentMode.name == GamemodeNames::EVE)
     {
-        waterSymbol = '.';
-
-        shipSymbol = '0';
-
-        destroyedShipSymbol = 'X';
-
-        destroyedWaterSymbol = '~';
-
         showFirstPlayerField = true; 
 
         showSecondPlayerField = true; 
@@ -157,6 +133,8 @@ void Game::initialize()
 void Game::changeActivePlayer()
 {
     std::swap(activePlayer, passivePlayer);
+
+    changeActiveField();
 }
 
 void Game::draw()
@@ -227,6 +205,14 @@ void Game::generatePlayersFields()
     playerTwo->generateBattleField();
 
     playerTwoField = playerTwo->field.get();
+
+    changeActiveField();
+}
+
+void Game::changeActiveField()
+{
+    activePlayerField = activePlayer.lock()->field.get();
+    passivePlayerField = passivePlayer.lock()->field.get();
 }
 
 void Game::chooseGameMode()
@@ -277,7 +263,7 @@ void Game::setWantedGameMode(int wantedGameMode)
 
 bool Game::areCoordinatesValid(int x, int y)
 {
-    return passivePlayer.lock()->canHitAtFieldLocation(x, y);
+    return passivePlayerField->canShootAtLocation(x, y);
 }
 
 void Game::drawField()

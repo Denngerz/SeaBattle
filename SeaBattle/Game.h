@@ -50,6 +50,9 @@ private:
 
     Field* playerOneField;
     Field* playerTwoField;
+
+    Field* passivePlayerField;
+    Field* activePlayerField;
     
     std::weak_ptr<SeaBattlePlayer> activePlayer;
     std::weak_ptr<SeaBattlePlayer> passivePlayer;
@@ -62,13 +65,14 @@ private:
     
     void generatePlayers();
     void generatePlayersFields();
+    void changeActiveField();
     
     int shootX, shootY;
 
     bool smbLostAllShips = false;
 
     bool areCoordinatesValid(int x, int y);
-
+    
     bool gameModeSet = false;
 
     void drawField();
@@ -79,15 +83,16 @@ private:
 
     bool wasShotValid = false;
 
-    char waterSymbol;
+    char waterSymbol = '.';
 
-    char shipSymbol;
+    char shipSymbol = '0';
 
-    char destroyedShipSymbol;
+    char destroyedShipSymbol = 'X';
 
-    char destroyedWaterSymbol;
+    char destroyedWaterSymbol = '~';
 
     bool showFirstPlayerField;
 
     bool showSecondPlayerField;
+
 };
