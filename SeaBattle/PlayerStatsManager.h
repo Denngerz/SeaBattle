@@ -22,9 +22,9 @@ private:
     
     static nlohmann::json playerStats;
 
-    void PlayerStatsManager::LoadStats();
+    void LoadStats();
 
-    void PlayerStatsManager::SaveStats(const nlohmann::json& data);
+    void SaveStats(const nlohmann::json& data);
 
     int basicMMRModifier = 20;
 };
