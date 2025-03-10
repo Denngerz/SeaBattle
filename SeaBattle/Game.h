@@ -10,7 +10,7 @@ struct cell;
 
 void startGame();
 
-enum gamemodeNames
+enum GamemodeNames
 {
     PVP,
     PVE,
@@ -19,7 +19,7 @@ enum gamemodeNames
 
 struct gameMode
 {
-    gamemodeNames name;
+    GamemodeNames name;
 };
 
 class Game

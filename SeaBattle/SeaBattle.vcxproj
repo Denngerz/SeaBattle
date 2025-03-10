@@ -157,12 +157,14 @@
     <ClCompile Include="Field.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PlayerStatsManager.cpp" />
     <ClCompile Include="SeaBattleBot.cpp" />
     <ClCompile Include="SeaBattlePlayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Field.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="PlayerStatsManager.h" />
     <ClInclude Include="SeaBattleBot.h" />
     <ClInclude Include="SeaBattlePlayer.h" />
   </ItemGroup>

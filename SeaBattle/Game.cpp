@@ -5,9 +5,9 @@
 #include "SeaBattleBot.h"
 #include "SeaBattlePlayer.h"
 
-const gameMode Game::pvp = {gamemodeNames::PVP};
-const gameMode Game::pve = {gamemodeNames::PVE};
-const gameMode Game::eve = {gamemodeNames::EVE};
+const gameMode Game::pvp = {GamemodeNames::PVP};
+const gameMode Game::pve = {GamemodeNames::PVE};
+const gameMode Game::eve = {GamemodeNames::EVE};
 
 void startGame()
 {
@@ -108,7 +108,7 @@ void Game::initialize()
 {
     chooseGameMode();
 
-    if(currentMode.name == gamemodeNames::PVP)
+    if(currentMode.name == GamemodeNames::PVP)
     {
         waterSymbol = '.';
 
@@ -123,7 +123,7 @@ void Game::initialize()
         showSecondPlayerField = false; 
     }
 
-    if(currentMode.name == gamemodeNames::PVE)
+    if(currentMode.name == GamemodeNames::PVE)
     {
         waterSymbol = '.';
 
@@ -138,7 +138,7 @@ void Game::initialize()
         showSecondPlayerField = false; 
     }
 
-    if(currentMode.name == gamemodeNames::EVE)
+    if(currentMode.name == GamemodeNames::EVE)
     {
         waterSymbol = '.';
 
@@ -195,19 +195,19 @@ void Game::generatePlayers()
 {
     if(gameModeSet)
     {
-        if(currentMode.name == gamemodeNames::PVP)
+        if(currentMode.name == GamemodeNames::PVP)
         {
             playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10, 1);
             playerTwo = std::make_shared<SeaBattlePlayer>(2, 10, 10, 2);
         }
         
-        if(currentMode.name == gamemodeNames::PVE)
+        if(currentMode.name == GamemodeNames::PVE)
         {
             playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10, 1);
             playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, 2);
         }
         
-        if(currentMode.name == gamemodeNames::EVE)
+        if(currentMode.name == GamemodeNames::EVE)
         {
             playerOne = std::make_shared<SeaBattleBot>(1, 10, 10, 1);
             playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, 2);
