@@ -401,13 +401,13 @@ void Game::drawCell(cell cell, bool isVisible)
 
 void Game::setPlayers()
 {
-    draw();
-    
     std::ifstream file(playerDBPath);
     file >> playersDB;
     
     if(!firstPlayerCreated)
     {
+        draw();
+        
         std::string firstPlayerUsername;
         std::cin >> firstPlayerUsername;
         
@@ -443,6 +443,8 @@ void Game::setPlayers()
 
     if(!secondPlayerCreated)
     {
+        draw();
+        
         std::string secondPlayerUsername;
         std::cin >> secondPlayerUsername;
         
