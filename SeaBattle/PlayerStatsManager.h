@@ -16,6 +16,7 @@ public:
     int getUserWonAmmount(std::string username);
     void updatePlayerStats(std::string username, bool didPlayerWin, int ammountOfMoves, int fieldSize);
     bool isPasswordRight(std::string username, std::string password);
+    bool doesUserExist(std::string username);
 
 private:
     std::string filePath;

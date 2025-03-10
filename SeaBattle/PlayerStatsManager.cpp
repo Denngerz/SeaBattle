@@ -188,6 +188,16 @@ bool PlayerStatsManager::isPasswordRight(std::string username, std::string passw
     return false;
 }
 
+bool PlayerStatsManager::doesUserExist(std::string username)
+{
+    for (auto& player : playerStats["players"]) {
+        if (player["username"] == username) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void PlayerStatsManager::LoadStats() {
     std::ifstream file(filePath);
     
