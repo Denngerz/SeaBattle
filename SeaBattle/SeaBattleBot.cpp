@@ -1,6 +1,10 @@
 ﻿#include "SeaBattleBot.h"
 #include "Field.h"
 
+SeaBattleBot::SeaBattleBot(unsigned int seedValue, int field_height, int field_width, std::string name): SeaBattlePlayer(seedValue, field_height, field_width), name(name)
+{
+}
+
 void SeaBattleBot::generateShootLocations()
 {
     shootX = rand() % field->getWidth() + 1;

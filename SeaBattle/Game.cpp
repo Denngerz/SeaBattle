@@ -1,6 +1,7 @@
 ﻿#include "Game.h"
+
+#include <fstream>
 #include <iostream>
-#include <iomanip>
 #include "Field.h"
 #include "SeaBattleBot.h"
 #include "SeaBattlePlayer.h"
@@ -59,6 +60,8 @@ void Game::logic()
     {
         activePlayerShootsAgain = true;
     }
+
+    ammountOfMoves++;
 }
 
 bool Game::isRoundOver()
@@ -141,26 +144,40 @@ void Game::draw()
 {
     if (gameModeSet)
     {
-        auto bot = std::dynamic_pointer_cast<SeaBattleBot>(activePlayer.lock());
-        if(true)
+        if(firstPlayerCreated)
         {
-            std::cout << std::endl;
+            if(secondPlayerCreated)
+            {
+                auto bot = std::dynamic_pointer_cast<SeaBattleBot>(activePlayer.lock());
+                if(true)
+                {
+                    std::cout << std::endl;
 
-            if(wasShotValid && activePlayerShootsAgain)
-            {
-                drawField();
-                std::cout << "Shoot again: ";
-            }
-            else if(!wasShotValid && activePlayerShootsAgain)
-            {
-                std::cout << "Enter valid shoot location: ";
+                    if(wasShotValid && activePlayerShootsAgain)
+                    {
+                        drawField();
+                        std::cout << "Shoot again: ";
+                    }
+                    else if(!wasShotValid && activePlayerShootsAgain)
+                    {
+                        std::cout << "Enter valid shoot location: ";
+                    }
+                    else
+                    {
+                        drawField();
+                        std::cout << activePlayer.lock()->username << " turn"<< std::endl;
+                        std::cout << "Enter shoot location (x, y): ";
+                    }
+                }
             }
             else
             {
-                drawField();
-                std::cout << "Player's " << activePlayer.lock()->id << " turn"<< std::endl;
-                std::cout << "Enter shoot location (x, y): ";
+                std::cout << "\n Enter second player name: ";
             }
+        }
+        else
+        {
+            std::cout << "\n Enter first player name: " << std::endl;
         }
     }
     else
@@ -175,20 +192,32 @@ void Game::generatePlayers()
     {
         if(currentMode.name == GamemodeNames::PVP)
         {
-            playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10, 1);
-            playerTwo = std::make_shared<SeaBattlePlayer>(2, 10, 10, 2);
+            playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10);
+            playerTwo = std::make_shared<SeaBattlePlayer>(2, 10, 10);
+            
+            setPlayers();
         }
         
         if(currentMode.name == GamemodeNames::PVE)
         {
-            playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10, 1);
-            playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, 2);
+            draw();
+            playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10);
+            playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, "Bot");
+            
+            secondPlayerCreated = true;
+            
+            setPlayers();
         }
         
         if(currentMode.name == GamemodeNames::EVE)
         {
-            playerOne = std::make_shared<SeaBattleBot>(1, 10, 10, 1);
-            playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, 2);
+            playerOne = std::make_shared<SeaBattleBot>(1, 10, 10, "Bot1");
+            playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, "Bot2");
+            
+            firstPlayerCreated = true;
+            secondPlayerCreated = true;
+            
+            setPlayers();
         }
 
         activePlayer = playerOne;
@@ -368,5 +397,97 @@ void Game::drawCell(cell cell, bool isVisible)
             std::cout << waterSymbol;
         }
     }
+}
+
+void Game::setPlayers()
+{
+    draw();
+    
+    std::ifstream file(playerDBPath);
+    file >> playersDB;
+    
+    if(!firstPlayerCreated)
+    {
+        std::string firstPlayerUsername;
+        std::cin >> firstPlayerUsername;
+        
+        bool foundProfile = false;
+            
+        for(auto& player: playersDB["players"])
+        {
+            if (player["username"] == firstPlayerUsername)
+            {
+                playerOne->deserialize(player);
+                foundProfile = true;
+                break;
+            }
+        }
+
+        if(!foundProfile)
+        {
+            createNewProfile(firstPlayerUsername, playersDB);
+            for(auto& player: playersDB["players"]){
+                if (player["username"] == firstPlayerUsername)
+                {
+                    playerOne->deserialize(player);
+                    foundProfile = true;
+                    break;
+                }
+            }
+        }
+
+        firstPlayerCreated = true;
+        
+        file.close();
+    }
+
+    if(!secondPlayerCreated)
+    {
+        std::string secondPlayerUsername;
+        std::cin >> secondPlayerUsername;
+        
+        bool foundProfile = false;
+            
+        for(auto& player: playersDB["players"])
+        {
+            if (player["username"] == secondPlayerUsername)
+            {
+                playerTwo->deserialize(player);
+                foundProfile = true;
+                break;
+            }
+        }
+
+        if(!foundProfile)
+        {
+            createNewProfile(secondPlayerUsername, playersDB);
+
+            for(auto& player: playersDB["players"])
+            {
+                if (player["username"] == secondPlayerUsername)
+                {
+                    playerTwo->deserialize(player);
+                    foundProfile = true;
+                    break;
+                }
+            }
+        }
+
+        secondPlayerCreated = true;
+        
+        file.close();
+    }
+}
+
+
+void Game::createNewProfile(std::string username, nlohmann::json json)
+{
+    json["players"].push_back({
+       {"username", username},
+       {"MMR", 0},
+       {"Winrate", 0},
+       {"Lost", 0},
+       {"Won", 0}
+   });
 }
 

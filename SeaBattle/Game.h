@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include <memory>
+#include <string>
+#include <nlohmann/json.hpp>
 
 class SeaBattlePlayer;
 
@@ -42,6 +44,8 @@ public:
     int getWantedGameModeName();
 
     void setWantedGameMode(int wantedGameModeName);
+
+    int ammountOfMoves = 0;
     
 private:
     
@@ -57,7 +61,9 @@ private:
     std::weak_ptr<SeaBattlePlayer> activePlayer;
     std::weak_ptr<SeaBattlePlayer> passivePlayer;
 
-    gameMode currentMode; 
+    gameMode currentMode;
+
+    nlohmann::json playersDB;
     
     static const gameMode pvp;
     static const gameMode pve;
@@ -94,5 +100,15 @@ private:
     bool showFirstPlayerField;
 
     bool showSecondPlayerField;
+
+    const std::string playerDBPath = "playersDB.json";
+
+    bool firstPlayerCreated = false;
+    
+    bool secondPlayerCreated = false;
+
+    void setPlayers();
+
+    void createNewProfile(std::string username, nlohmann::json json);
 
 };
