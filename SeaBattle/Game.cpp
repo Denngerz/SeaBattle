@@ -39,6 +39,7 @@ void Game::logic()
     {
         passivePlayerField->implementHitAtLocation(shootX, shootY);
         wasShotValid = true;
+        ammountOfMoves++;
     }
     else
     {
@@ -49,6 +50,11 @@ void Game::logic()
     {
         smbLostAllShips = true;
         drawField();
+        
+        updatePlayersStats(activePlayer.lock().get(), passivePlayer.lock().get(), ammountOfMoves);
+        savePlayersDB();
+
+        drawWinner(activePlayer.lock().get());
     }
 
     if(!passivePlayerField->smShipGotShot && wasShotValid)
@@ -60,8 +66,6 @@ void Game::logic()
     {
         activePlayerShootsAgain = true;
     }
-
-    ammountOfMoves++;
 }
 
 bool Game::isRoundOver()
@@ -172,12 +176,12 @@ void Game::draw()
             }
             else
             {
-                std::cout << "\n Enter second player name: ";
+                std::cout << "\nEnter second player name: ";
             }
         }
         else
         {
-            std::cout << "\n Enter first player name: " << std::endl;
+            std::cout << "\nEnter first player name: " << std::endl;
         }
     }
     else
@@ -194,8 +198,6 @@ void Game::generatePlayers()
         {
             playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10);
             playerTwo = std::make_shared<SeaBattlePlayer>(2, 10, 10);
-            
-            setPlayers();
         }
         
         if(currentMode.name == GamemodeNames::PVE)
@@ -205,8 +207,6 @@ void Game::generatePlayers()
             playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, "Bot");
             
             secondPlayerCreated = true;
-            
-            setPlayers();
         }
         
         if(currentMode.name == GamemodeNames::EVE)
@@ -216,10 +216,10 @@ void Game::generatePlayers()
             
             firstPlayerCreated = true;
             secondPlayerCreated = true;
-            
-            setPlayers();
         }
 
+        setPlayers();
+        
         activePlayer = playerOne;
         passivePlayer = playerTwo;
     }
@@ -399,6 +399,11 @@ void Game::drawCell(cell cell, bool isVisible)
     }
 }
 
+void Game::drawWinner(SeaBattlePlayer* winner)
+{
+    std::cout << "Winner: " << winner->username << std::endl;
+}
+
 void Game::setPlayers()
 {
     std::ifstream file(playerDBPath);
@@ -425,7 +430,9 @@ void Game::setPlayers()
 
         if(!foundProfile)
         {
-            createNewProfile(firstPlayerUsername, playersDB);
+            createNewProfile(firstPlayerUsername);
+            savePlayersDB();
+            
             for(auto& player: playersDB["players"]){
                 if (player["username"] == firstPlayerUsername)
                 {
@@ -462,7 +469,8 @@ void Game::setPlayers()
 
         if(!foundProfile)
         {
-            createNewProfile(secondPlayerUsername, playersDB);
+            createNewProfile(secondPlayerUsername);
+            savePlayersDB();
 
             for(auto& player: playersDB["players"])
             {
@@ -482,14 +490,62 @@ void Game::setPlayers()
 }
 
 
-void Game::createNewProfile(std::string username, nlohmann::json json)
+void Game::createNewProfile(std::string username)
 {
-    json["players"].push_back({
+    playersDB["players"].push_back({
        {"username", username},
-       {"MMR", 0},
-       {"Winrate", 0},
-       {"Lost", 0},
-       {"Won", 0}
-   });
+       {"mmr", 0},
+       {"winrate", 0.0},
+       {"lost", 0},
+       {"won", 0}
+    });
 }
+
+void Game::savePlayersDB()
+{
+    std::ofstream outFile(playerDBPath);
+    
+    outFile << playersDB.dump(4);
+    
+    outFile.close();
+}
+
+void Game::updatePlayersStats(SeaBattlePlayer* winner, SeaBattlePlayer* loser, int moves)
+{
+    int fieldSize = playerOneField->getHeight() * playerOneField->getWidth();
+
+    if(!dynamic_cast<SeaBattleBot*>(winner))
+    {
+        winner->won++;
+        winner->winRate = (winner->lost == 0) ? 1.0 : static_cast<double>(winner->won) / winner->lost;
+        winner->mmr = winner->mmr + defaultMMRBonus + 5 * (1 - moves / fieldSize);
+
+        updatePlayerStatsInFile(winner);
+    }
+
+    if(!dynamic_cast<SeaBattleBot*>(loser))
+    {
+        loser->lost++;
+        loser->winRate = (loser->lost == 0) ? 0.0 : static_cast<double>(loser->won) / loser->lost;
+        loser->mmr = loser->mmr - defaultMMRBonus;
+
+        updatePlayerStatsInFile(loser);
+    }
+}
+
+void Game::updatePlayerStatsInFile(SeaBattlePlayer* currentPlayer)
+{
+    for(auto& player: playersDB["players"])
+    {
+        if(player["username"] == currentPlayer->username)
+        {
+            player["winrate"] = currentPlayer->winRate;
+            player["mmr"] = currentPlayer->mmr;
+            player["lost"] = currentPlayer->lost;
+            player["won"] = currentPlayer->won;
+            break;
+        }
+    }
+}
+
 

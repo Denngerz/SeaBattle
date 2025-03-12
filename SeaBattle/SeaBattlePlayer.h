@@ -18,7 +18,7 @@ public:
     
     std::string username;
     
-    int MMR = 0;
+    int mmr = 0;
     
     double winRate = 0;
     

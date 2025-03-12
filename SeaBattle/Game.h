@@ -64,6 +64,8 @@ private:
     gameMode currentMode;
 
     nlohmann::json playersDB;
+
+    int defaultMMRBonus = 20;
     
     static const gameMode pvp;
     static const gameMode pve;
@@ -84,6 +86,8 @@ private:
     void drawField();
 
     void drawCell(cell cell, bool isVisible);
+
+    void drawWinner(SeaBattlePlayer* winner);
 
     bool activePlayerShootsAgain = false;
 
@@ -109,6 +113,11 @@ private:
 
     void setPlayers();
 
-    void createNewProfile(std::string username, nlohmann::json json);
+    void createNewProfile(std::string username);
 
+    void savePlayersDB();
+
+    void updatePlayersStats(SeaBattlePlayer* winner, SeaBattlePlayer* loser, int ammountOfMoves);
+
+    void updatePlayerStatsInFile(SeaBattlePlayer* currentPlayer);
 };

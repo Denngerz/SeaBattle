@@ -166,6 +166,9 @@
     <ClInclude Include="SeaBattleBot.h" />
     <ClInclude Include="SeaBattlePlayer.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="playersDB.json" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

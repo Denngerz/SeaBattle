@@ -1,8 +1,9 @@
 ﻿#include "SeaBattleBot.h"
 #include "Field.h"
 
-SeaBattleBot::SeaBattleBot(unsigned int seedValue, int field_height, int field_width, std::string name): SeaBattlePlayer(seedValue, field_height, field_width), name(name)
+SeaBattleBot::SeaBattleBot(unsigned int seedValue, int field_height, int field_width, std::string name): SeaBattlePlayer(seedValue, field_height, field_width)
 {
+    username = name;
 }
 
 void SeaBattleBot::generateShootLocations()

@@ -1,7 +1,4 @@
 ﻿#include "SeaBattlePlayer.h"
-
-#include <fstream>
-
 #include "Field.h"
 
 SeaBattlePlayer::SeaBattlePlayer(unsigned int seedValue, int field_height, int field_width): seed(seedValue)
@@ -33,8 +30,8 @@ nlohmann::json SeaBattlePlayer::serialize() const
 {
     return {
                 {"username", username},
-                {"MMR", MMR},
-                {"winRate", winRate},
+                {"mmr", mmr},
+                {"winrate", winRate},
                 {"won", won},
                 {"lost", lost},
     };
@@ -43,8 +40,8 @@ nlohmann::json SeaBattlePlayer::serialize() const
 void SeaBattlePlayer::deserialize(const nlohmann::json& j) 
 {
     username = j["username"];
-    MMR = j["MMR"];
-    winRate = j["winRate"];
+    mmr = j["mmr"];
+    winRate = j["winrate"];
     won = j["won"];
     lost = j["lost"];
 }
