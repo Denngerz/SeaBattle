@@ -1,14 +1,17 @@
 ﻿#include "Game.h"
-
 #include <fstream>
 #include <iostream>
 #include "Field.h"
 #include "SeaBattleBot.h"
 #include "SeaBattlePlayer.h"
 
-const gameMode Game::pvp = {GamemodeNames::PVP};
-const gameMode Game::pve = {GamemodeNames::PVE};
-const gameMode Game::eve = {GamemodeNames::EVE};
+const GameMode Game::pvp = {GamemodeNames::PVP};
+const GameMode Game::pve = {GamemodeNames::PVE};
+const GameMode Game::eve = {GamemodeNames::EVE};
+
+const BotDifficulty Game::easy = {BotDifficultyNames::EASY, 5};
+const BotDifficulty Game::normal = {BotDifficultyNames::NORMAL, 15};
+const BotDifficulty Game::hard = {BotDifficultyNames::HARD, 25};
 
 void startGame()
 {
@@ -148,40 +151,47 @@ void Game::draw()
 {
     if (gameModeSet)
     {
-        if(firstPlayerCreated)
+        if(isDifficultySet)
         {
-            if(secondPlayerCreated)
+            if(firstPlayerCreated)
             {
-                auto bot = std::dynamic_pointer_cast<SeaBattleBot>(activePlayer.lock());
-                if(true)
+                if(secondPlayerCreated)
                 {
-                    std::cout << std::endl;
+                    auto bot = std::dynamic_pointer_cast<SeaBattleBot>(activePlayer.lock());
+                    if(true)
+                    {
+                        std::cout << std::endl;
 
-                    if(wasShotValid && activePlayerShootsAgain)
-                    {
-                        drawField();
-                        std::cout << "Shoot again: ";
+                        if(wasShotValid && activePlayerShootsAgain)
+                        {
+                            drawField();
+                            std::cout << "Shoot again: ";
+                        }
+                        else if(!wasShotValid && activePlayerShootsAgain)
+                        {
+                            std::cout << "Enter valid shoot location: ";
+                        }
+                        else
+                        {
+                            drawField();
+                            std::cout << activePlayer.lock()->username << " turn"<< std::endl;
+                            std::cout << "Enter shoot location (x, y): ";
+                        }
                     }
-                    else if(!wasShotValid && activePlayerShootsAgain)
-                    {
-                        std::cout << "Enter valid shoot location: ";
-                    }
-                    else
-                    {
-                        drawField();
-                        std::cout << activePlayer.lock()->username << " turn"<< std::endl;
-                        std::cout << "Enter shoot location (x, y): ";
-                    }
+                }
+                else
+                {
+                    std::cout << "\nEnter second player name: ";
                 }
             }
             else
             {
-                std::cout << "\nEnter second player name: ";
+                std::cout << "\nEnter first player name: " << std::endl;
             }
         }
         else
         {
-            std::cout << "\nEnter first player name: " << std::endl;
+            std::cout << "\nEnter difficulty (1 - Easy, 2 - Normal, 3 - Hard): ";
         }
     }
     else
@@ -198,21 +208,29 @@ void Game::generatePlayers()
         {
             playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10);
             playerTwo = std::make_shared<SeaBattlePlayer>(2, 10, 10);
+
+            isDifficultySet = true;
         }
         
         if(currentMode.name == GamemodeNames::PVE)
         {
-            draw();
+            chooseBotDifficulty();
             playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10);
-            playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, "Bot");
+            playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, "Bot", currentBotDifficulty.chance);
+
+            std::dynamic_pointer_cast<SeaBattleBot>(playerTwo)->setEnemyField(playerOne->field.get());
             
             secondPlayerCreated = true;
         }
         
         if(currentMode.name == GamemodeNames::EVE)
         {
-            playerOne = std::make_shared<SeaBattleBot>(1, 10, 10, "Bot1");
-            playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, "Bot2");
+            chooseBotDifficulty();
+            playerOne = std::make_shared<SeaBattleBot>(1, 10, 10, "Bot1", currentBotDifficulty.chance);
+            playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, "Bot2", currentBotDifficulty.chance);
+
+            std::dynamic_pointer_cast<SeaBattleBot>(playerOne)->setEnemyField(playerTwo->field.get());
+            std::dynamic_pointer_cast<SeaBattleBot>(playerTwo)->setEnemyField(playerOne->field.get());
             
             firstPlayerCreated = true;
             secondPlayerCreated = true;
@@ -369,15 +387,15 @@ void Game::drawCell(cell cell, bool isVisible)
         {
             std::cout << waterSymbol;
         }
-        if(cell.hasShip&& !cell.wasShot)
+        if(cell.hasShip && !cell.wasShot)
         {
             std::cout << shipSymbol;
         }
-        if(!cell.hasShip&& cell.wasShot)
+        if(!cell.hasShip && cell.wasShot)
         {
             std::cout << destroyedWaterSymbol;
         }
-        if(cell.hasShip&& cell.wasShot)
+        if(cell.hasShip && cell.wasShot)
         {
             std::cout << destroyedShipSymbol;
         }
@@ -388,7 +406,7 @@ void Game::drawCell(cell cell, bool isVisible)
         {
             std::cout <<  destroyedShipSymbol;
         }
-        if(!cell.hasShip&& cell.wasShot)
+        else if(!cell.hasShip && cell.wasShot)
         {
             std::cout << destroyedWaterSymbol;
         }
@@ -546,6 +564,52 @@ void Game::updatePlayerStatsInFile(SeaBattlePlayer* currentPlayer)
             break;
         }
     }
+}
+
+void Game::chooseBotDifficulty()
+{
+    while(!isDifficultySet)
+    {
+        draw();
+        setWantedBotDifficulty(getWantedBotDifficultyName());
+    }
+}
+
+void Game::setWantedBotDifficulty(int wantedBotDifficulty)
+{
+    switch(wantedBotDifficulty)
+    {
+    case 1:
+        currentBotDifficulty = easy;
+        isDifficultySet = true;
+        break;
+        
+    case 2:
+        currentBotDifficulty = normal;
+        isDifficultySet = true;
+        break;
+        
+    case 3:
+        currentBotDifficulty = hard;
+        isDifficultySet = true;
+        break;
+    default:
+        isDifficultySet = false;
+    }
+}
+
+int Game::getWantedBotDifficultyName()
+{
+    int botDifficulty = 0;
+    std::cin >> botDifficulty;
+
+    while(std::cin.fail())
+    {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+
+    return botDifficulty;
 }
 
 

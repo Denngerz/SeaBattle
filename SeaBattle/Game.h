@@ -19,9 +19,22 @@ enum GamemodeNames
     EVE
 };
 
-struct gameMode
+struct GameMode
 {
     GamemodeNames name;
+};
+
+enum BotDifficultyNames
+{
+    EASY,
+    NORMAL,
+    HARD
+};
+
+struct BotDifficulty
+{
+    BotDifficultyNames name;
+    int chance;
 };
 
 class Game
@@ -61,15 +74,21 @@ private:
     std::weak_ptr<SeaBattlePlayer> activePlayer;
     std::weak_ptr<SeaBattlePlayer> passivePlayer;
 
-    gameMode currentMode;
+    GameMode currentMode;
+
+    BotDifficulty currentBotDifficulty;
 
     nlohmann::json playersDB;
 
     int defaultMMRBonus = 20;
     
-    static const gameMode pvp;
-    static const gameMode pve;
-    static const gameMode eve;
+    static const GameMode pvp;
+    static const GameMode pve;
+    static const GameMode eve;
+
+    static const BotDifficulty easy;
+    static const BotDifficulty normal;
+    static const BotDifficulty hard;
     
     void generatePlayers();
     void generatePlayersFields();
@@ -120,4 +139,12 @@ private:
     void updatePlayersStats(SeaBattlePlayer* winner, SeaBattlePlayer* loser, int ammountOfMoves);
 
     void updatePlayerStatsInFile(SeaBattlePlayer* currentPlayer);
+
+    void chooseBotDifficulty();
+
+    bool isDifficultySet = false;
+
+    void setWantedBotDifficulty(int wantedBotDifficulty);
+
+    int getWantedBotDifficultyName();
 };
