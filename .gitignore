@@ -36,5 +36,5 @@ Thumbs.db
 
 *.iml 
 *.userprefs
-
-*.DotSettings.user
+*.json
+*.vcxproj.user

@@ -1,26 +1,27 @@
 ﻿#pragma once
 #include "SeaBattlePlayer.h"
-
-struct cell;
-class Field;
+#include "GameEnums.h"
 
 class SeaBattleBot : public SeaBattlePlayer
 {
 public:
-    SeaBattleBot(unsigned int seedValue, int field_height, int field_width, std::string name, int shipShootChance);
+    SeaBattleBot(unsigned int seedValue, int field_height, int field_width, std::string name, BotDifficulty difficulty);
 
     void generateShootLocations();
 
-    void setEnemyField(Field* shootingField);
+    int hitChance;
 
+    BotDifficulty currentDifficulty;
+
+    void setEnemyField(Field* shootingField);
+    
     int getShootX() const;
     int getShootY() const;
     
 private:
     int shootX, shootY;
 
-    int shootChance;
+    void setHitChanceBasedOnDifficulty();
 
     Field* enemyField;
-    
 };

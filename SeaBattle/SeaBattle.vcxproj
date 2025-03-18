@@ -156,18 +156,20 @@
   <ItemGroup>
     <ClCompile Include="Field.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Lobby.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SeaBattleBot.cpp" />
     <ClCompile Include="SeaBattlePlayer.cpp" />
+    <ClCompile Include="StatsPlayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Field.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameEnums.h" />
+    <ClInclude Include="Lobby.h" />
     <ClInclude Include="SeaBattleBot.h" />
     <ClInclude Include="SeaBattlePlayer.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="playersDB.json" />
+    <ClInclude Include="StatsPlayer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

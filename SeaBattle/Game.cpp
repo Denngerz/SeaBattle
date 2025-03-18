@@ -1,26 +1,16 @@
 ﻿#include "Game.h"
-#include <fstream>
 #include <iostream>
+#include <iomanip>
 #include "Field.h"
 #include "SeaBattleBot.h"
 #include "SeaBattlePlayer.h"
 
-const GameMode Game::pvp = {GamemodeNames::PVP};
-const GameMode Game::pve = {GamemodeNames::PVE};
-const GameMode Game::eve = {GamemodeNames::EVE};
-
-const BotDifficulty Game::easy = {BotDifficultyNames::EASY, 5};
-const BotDifficulty Game::normal = {BotDifficultyNames::NORMAL, 15};
-const BotDifficulty Game::hard = {BotDifficultyNames::HARD, 25};
-
-void startGame()
+Game::Game(GameMode chosenGamemode, std::string chosenFirstPlayerName, std::string chosenSecondPlayerName, BotDifficulty chosenBotDifficulty)
 {
-    Game game;
-}
-
-Game::Game()
-{
-    startRounds();
+    gamemode = chosenGamemode;
+    firstPlayerName = chosenFirstPlayerName;
+    secondPlayerName = chosenSecondPlayerName;
+    botDifficulty = chosenBotDifficulty;
 }
 
 void Game::startRounds()
@@ -38,37 +28,48 @@ void Game::startRounds()
 
 void Game::logic()
 {
+    if(auto bot = std::dynamic_pointer_cast<SeaBattleBot>(activePlayer.lock()))
+    {
+        bot->generateShootLocations();
+        
+        shootX = bot->getShootX();
+        shootY = bot->getShootY();
+    }
+    
     if(areCoordinatesValid(shootX, shootY))
     {
-        passivePlayerField->implementHitAtLocation(shootX, shootY);
+        passivePlayer.lock()->applyHitToField(shootX, shootY);
+        
         wasShotValid = true;
-        ammountOfMoves++;
     }
     else
     {
         wasShotValid = false;
     }
     
-    if(!passivePlayerField->isAnyShipsLeft())
+    if(!passivePlayer.lock()->isAnyShipsLeftOnField())
     {
         smbLostAllShips = true;
+        
         drawField();
         
-        updatePlayersStats(activePlayer.lock().get(), passivePlayer.lock().get(), ammountOfMoves);
-        savePlayersDB();
-
         drawWinner(activePlayer.lock().get());
+        
+        return;
     }
-
-    if(!passivePlayerField->smShipGotShot && wasShotValid)
+    
+    if(!passivePlayer.lock()->isAnyShipGotShot() && wasShotValid)
     {
         activePlayerShootsAgain = false;
+        
         changeActivePlayer();
     }
     else
     {
         activePlayerShootsAgain = true;
     }
+
+    ammountOfMoves++;
 }
 
 bool Game::isRoundOver()
@@ -78,13 +79,7 @@ bool Game::isRoundOver()
 
 void Game::getInput()
 {
-    if(auto botPlayer = std::dynamic_pointer_cast<SeaBattleBot>(activePlayer.lock()))
-    {
-        botPlayer->generateShootLocations();
-        shootX = botPlayer->getShootX();
-        shootY = botPlayer->getShootY();
-    }
-    else
+    if(!std::dynamic_pointer_cast<SeaBattleBot>(activePlayer.lock()))
     {
         std::cin >> shootX;
     
@@ -101,11 +96,11 @@ void Game::getInput()
         {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        } 
+        }
+
+        shootX --;
+        shootY --;
     }
-    
-    shootX --;
-    shootY --;
 }
 
 void Game::generate()
@@ -116,23 +111,21 @@ void Game::generate()
 
 void Game::initialize()
 {
-    chooseGameMode();
-
-    if(currentMode.name == GamemodeNames::PVP)
+    if(gamemode == GameMode::PVP)
     {
-        showFirstPlayerField = false;
+        showFirstPlayerField = false; 
 
-        showSecondPlayerField = false;
+        showSecondPlayerField = false; 
     }
 
-    if(currentMode.name == GamemodeNames::PVE)
+    if(gamemode == GameMode::PVE)
     {
         showFirstPlayerField = true; 
 
         showSecondPlayerField = false; 
     }
 
-    if(currentMode.name == GamemodeNames::EVE)
+    if(gamemode == GameMode::EVE)
     {
         showFirstPlayerField = true; 
 
@@ -143,104 +136,65 @@ void Game::initialize()
 void Game::changeActivePlayer()
 {
     std::swap(activePlayer, passivePlayer);
-
-    changeActiveField();
 }
 
 void Game::draw()
 {
-    if (gameModeSet)
-    {
-        if(isDifficultySet)
-        {
-            if(firstPlayerCreated)
-            {
-                if(secondPlayerCreated)
-                {
-                    auto bot = std::dynamic_pointer_cast<SeaBattleBot>(activePlayer.lock());
-                    if(true)
-                    {
-                        std::cout << std::endl;
+    std::cout << std::endl;
 
-                        if(wasShotValid && activePlayerShootsAgain)
-                        {
-                            drawField();
-                            std::cout << "Shoot again: ";
-                        }
-                        else if(!wasShotValid && activePlayerShootsAgain)
-                        {
-                            std::cout << "Enter valid shoot location: ";
-                        }
-                        else
-                        {
-                            drawField();
-                            std::cout << activePlayer.lock()->username << " turn"<< std::endl;
-                            std::cout << "Enter shoot location (x, y): ";
-                        }
-                    }
-                }
-                else
-                {
-                    std::cout << "\nEnter second player name: ";
-                }
-            }
-            else
-            {
-                std::cout << "\nEnter first player name: " << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << "\nEnter difficulty (1 - Easy, 2 - Normal, 3 - Hard): ";
-        }
+    if(wasShotValid && activePlayerShootsAgain)
+    {
+        drawField();
+        std::cout << "Shoot again: ";
+    }
+    else if(!wasShotValid && activePlayerShootsAgain)
+    {
+        std::cout << "Enter valid shoot location: ";
     }
     else
     {
-        std::cout << "Enter the name of the game mode (1 - PVP, 2 - PVE, 3 - EVE): ";
+        drawField();
+        std::cout << "Player's " << activePlayer.lock()->username << " turn"<< std::endl;
+        std::cout << "Enter shoot location (x, y): ";
     }
+}
+
+SeaBattlePlayer* Game::getWinner()
+{
+    return activePlayer.lock().get();
+}
+
+SeaBattlePlayer* Game::getLoser()
+{
+    return passivePlayer.lock().get();
 }
 
 void Game::generatePlayers()
 {
-    if(gameModeSet)
+    if(gamemode == GameMode::PVP)
     {
-        if(currentMode.name == GamemodeNames::PVP)
-        {
-            playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10);
-            playerTwo = std::make_shared<SeaBattlePlayer>(2, 10, 10);
-
-            isDifficultySet = true;
-        }
-        
-        if(currentMode.name == GamemodeNames::PVE)
-        {
-            chooseBotDifficulty();
-            playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10);
-            playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, "Bot", currentBotDifficulty.chance);
-
-            std::dynamic_pointer_cast<SeaBattleBot>(playerTwo)->setEnemyField(playerOne->field.get());
-            
-            secondPlayerCreated = true;
-        }
-        
-        if(currentMode.name == GamemodeNames::EVE)
-        {
-            chooseBotDifficulty();
-            playerOne = std::make_shared<SeaBattleBot>(1, 10, 10, "Bot1", currentBotDifficulty.chance);
-            playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, "Bot2", currentBotDifficulty.chance);
-
-            std::dynamic_pointer_cast<SeaBattleBot>(playerOne)->setEnemyField(playerTwo->field.get());
-            std::dynamic_pointer_cast<SeaBattleBot>(playerTwo)->setEnemyField(playerOne->field.get());
-            
-            firstPlayerCreated = true;
-            secondPlayerCreated = true;
-        }
-
-        setPlayers();
-        
-        activePlayer = playerOne;
-        passivePlayer = playerTwo;
+        playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10, firstPlayerName);
+        playerTwo = std::make_shared<SeaBattlePlayer>(2, 10, 10, secondPlayerName);
     }
+    if(gamemode == GameMode::PVE)
+    {
+        playerOne = std::make_shared<SeaBattlePlayer>(1, 10, 10, firstPlayerName);
+        playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, secondPlayerName, botDifficulty);
+
+        std::dynamic_pointer_cast<SeaBattleBot>(playerTwo)->setEnemyField(playerOne->field.get());
+    }
+        
+    if(gamemode == GameMode::EVE)
+    {
+        playerOne = std::make_shared<SeaBattleBot>(1, 10, 10, firstPlayerName, botDifficulty);
+        playerTwo = std::make_shared<SeaBattleBot>(2, 10, 10, secondPlayerName, botDifficulty);
+
+        std::dynamic_pointer_cast<SeaBattleBot>(playerOne)->setEnemyField(playerTwo->field.get());
+        std::dynamic_pointer_cast<SeaBattleBot>(playerTwo)->setEnemyField(playerOne->field.get());
+    }
+        
+    activePlayer = playerOne;
+    passivePlayer = playerTwo;
 }
 
 void Game::generatePlayersFields()
@@ -253,64 +207,12 @@ void Game::generatePlayersFields()
 
     playerTwoField = playerTwo->field.get();
 
-    changeActiveField();
-}
-
-void Game::changeActiveField()
-{
-    activePlayerField = activePlayer.lock()->field.get();
-    passivePlayerField = passivePlayer.lock()->field.get();
-}
-
-void Game::chooseGameMode()
-{
-    while(!gameModeSet)
-    {
-        draw();
-        setWantedGameMode(getWantedGameModeName());
-    }
-}
-
-int Game::getWantedGameModeName()
-{
-    int gameMode;
-    std::cin >> gameMode;
-    
-    while(std::cin.fail())
-    {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
-
-    return gameMode;
-}
-
-void Game::setWantedGameMode(int wantedGameMode)
-{
-    switch(wantedGameMode)
-    {
-        case 1:
-            currentMode = pvp;
-            gameModeSet = true;
-            break;
-        
-        case 2:
-            currentMode = pve;
-            gameModeSet = true;
-            break;
-        
-        case 3:
-            currentMode = eve;
-            gameModeSet = true;
-            break;
-        default:
-            gameModeSet = false;
-    }
+    fieldSize = playerTwo->field.get()->getHeight() * playerTwo->field.get()->getWidth();
 }
 
 bool Game::areCoordinatesValid(int x, int y)
 {
-    return passivePlayerField->canShootAtLocation(x, y);
+    return passivePlayer.lock()->canHitAtFieldLocation(x, y);
 }
 
 void Game::drawField()
@@ -386,16 +288,19 @@ void Game::drawCell(cell cell, bool isVisible)
         if(!cell.hasShip && !cell.wasShot)
         {
             std::cout << waterSymbol;
+            return;
         }
-        if(cell.hasShip && !cell.wasShot)
+        if(cell.hasShip&& !cell.wasShot)
         {
             std::cout << shipSymbol;
+            return;
         }
-        if(!cell.hasShip && cell.wasShot)
+        if(!cell.hasShip&& cell.wasShot)
         {
             std::cout << destroyedWaterSymbol;
+            return;
         }
-        if(cell.hasShip && cell.wasShot)
+        if(cell.hasShip&& cell.wasShot)
         {
             std::cout << destroyedShipSymbol;
         }
@@ -406,7 +311,7 @@ void Game::drawCell(cell cell, bool isVisible)
         {
             std::cout <<  destroyedShipSymbol;
         }
-        else if(!cell.hasShip && cell.wasShot)
+        else if(!cell.hasShip&& cell.wasShot)
         {
             std::cout << destroyedWaterSymbol;
         }
@@ -421,195 +326,3 @@ void Game::drawWinner(SeaBattlePlayer* winner)
 {
     std::cout << "Winner: " << winner->username << std::endl;
 }
-
-void Game::setPlayers()
-{
-    std::ifstream file(playerDBPath);
-    file >> playersDB;
-    
-    if(!firstPlayerCreated)
-    {
-        draw();
-        
-        std::string firstPlayerUsername;
-        std::cin >> firstPlayerUsername;
-        
-        bool foundProfile = false;
-            
-        for(auto& player: playersDB["players"])
-        {
-            if (player["username"] == firstPlayerUsername)
-            {
-                playerOne->deserialize(player);
-                foundProfile = true;
-                break;
-            }
-        }
-
-        if(!foundProfile)
-        {
-            createNewProfile(firstPlayerUsername);
-            savePlayersDB();
-            
-            for(auto& player: playersDB["players"]){
-                if (player["username"] == firstPlayerUsername)
-                {
-                    playerOne->deserialize(player);
-                    foundProfile = true;
-                    break;
-                }
-            }
-        }
-
-        firstPlayerCreated = true;
-        
-        file.close();
-    }
-
-    if(!secondPlayerCreated)
-    {
-        draw();
-        
-        std::string secondPlayerUsername;
-        std::cin >> secondPlayerUsername;
-        
-        bool foundProfile = false;
-            
-        for(auto& player: playersDB["players"])
-        {
-            if (player["username"] == secondPlayerUsername)
-            {
-                playerTwo->deserialize(player);
-                foundProfile = true;
-                break;
-            }
-        }
-
-        if(!foundProfile)
-        {
-            createNewProfile(secondPlayerUsername);
-            savePlayersDB();
-
-            for(auto& player: playersDB["players"])
-            {
-                if (player["username"] == secondPlayerUsername)
-                {
-                    playerTwo->deserialize(player);
-                    foundProfile = true;
-                    break;
-                }
-            }
-        }
-
-        secondPlayerCreated = true;
-        
-        file.close();
-    }
-}
-
-
-void Game::createNewProfile(std::string username)
-{
-    playersDB["players"].push_back({
-       {"username", username},
-       {"mmr", 0},
-       {"winrate", 0.0},
-       {"lost", 0},
-       {"won", 0}
-    });
-}
-
-void Game::savePlayersDB()
-{
-    std::ofstream outFile(playerDBPath);
-    
-    outFile << playersDB.dump(4);
-    
-    outFile.close();
-}
-
-void Game::updatePlayersStats(SeaBattlePlayer* winner, SeaBattlePlayer* loser, int moves)
-{
-    int fieldSize = playerOneField->getHeight() * playerOneField->getWidth();
-
-    if(!dynamic_cast<SeaBattleBot*>(winner))
-    {
-        winner->won++;
-        winner->winRate = (winner->lost == 0) ? 1.0 : static_cast<double>(winner->won) / winner->lost;
-        winner->mmr = winner->mmr + defaultMMRBonus + 5 * (1 - moves / fieldSize);
-
-        updatePlayerStatsInFile(winner);
-    }
-
-    if(!dynamic_cast<SeaBattleBot*>(loser))
-    {
-        loser->lost++;
-        loser->winRate = (loser->lost == 0) ? 0.0 : static_cast<double>(loser->won) / loser->lost;
-        loser->mmr = loser->mmr - defaultMMRBonus;
-
-        updatePlayerStatsInFile(loser);
-    }
-}
-
-void Game::updatePlayerStatsInFile(SeaBattlePlayer* currentPlayer)
-{
-    for(auto& player: playersDB["players"])
-    {
-        if(player["username"] == currentPlayer->username)
-        {
-            player["winrate"] = currentPlayer->winRate;
-            player["mmr"] = currentPlayer->mmr;
-            player["lost"] = currentPlayer->lost;
-            player["won"] = currentPlayer->won;
-            break;
-        }
-    }
-}
-
-void Game::chooseBotDifficulty()
-{
-    while(!isDifficultySet)
-    {
-        draw();
-        setWantedBotDifficulty(getWantedBotDifficultyName());
-    }
-}
-
-void Game::setWantedBotDifficulty(int wantedBotDifficulty)
-{
-    switch(wantedBotDifficulty)
-    {
-    case 1:
-        currentBotDifficulty = easy;
-        isDifficultySet = true;
-        break;
-        
-    case 2:
-        currentBotDifficulty = normal;
-        isDifficultySet = true;
-        break;
-        
-    case 3:
-        currentBotDifficulty = hard;
-        isDifficultySet = true;
-        break;
-    default:
-        isDifficultySet = false;
-    }
-}
-
-int Game::getWantedBotDifficultyName()
-{
-    int botDifficulty = 0;
-    std::cin >> botDifficulty;
-
-    while(std::cin.fail())
-    {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
-
-    return botDifficulty;
-}
-
-
