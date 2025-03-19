@@ -1,7 +1,6 @@
 ﻿#include "StatsPlayer.h"
 #include <fstream>
 
-
 StatsPlayer::StatsPlayer(std::string name, std::string filename)
 {
     username = name;

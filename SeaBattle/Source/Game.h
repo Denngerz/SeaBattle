@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "ThirdParty/nlohmann/json.hpp"
+#include "../ThirdParty/nlohmann/json.hpp"
 #include <memory>
 #include "GameEnums.h"
 #include "Field.h"
