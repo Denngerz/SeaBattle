@@ -16,13 +16,14 @@ public:
 
     void generate();
 
+    //========Bool checks========//
     bool isAnyShipsLeft() const;
-
-    void implementHitAtLocation(const int x, const int y);
     
     bool smShipGotShot = false;
     
     bool canShootAtLocation(int shootX, int shootY);
+
+    //========Getters========//
 
     std::vector<std::vector<cell>> getField() const;
 
@@ -31,21 +32,27 @@ public:
     int getHeight() const;
 
     int getWidth() const;
+
+    //=========Implement shot=========//
+    void implementHitAtLocation(const int x, const int y);
     
 private:
+    //=========Field vector=========//
     std::vector<std::vector<cell>> field;
+
+    //=========Field settings=========//
+    int initialShipsAmmount = 10;
 
     const int width;
     
     const int height;
-    
-    int shipsAmmount;
 
-    int initialShipsAmmount = 10;
-
+    //=========Field generation========//
     void generateField();
     
     void tryGenerateShips();
 
     bool canSpawnShipInLocation(const int shipX, const int shipY) const;
+
+    int shipsAmmount;
 };

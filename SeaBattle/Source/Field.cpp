@@ -6,6 +6,7 @@ Field::Field(unsigned int seedValue, int new_width, int new_height): width(new_w
     seed = seedValue;
 }
 
+//====================Field generation====================//
 void Field::generate()
 {
     generateField();
@@ -64,6 +65,7 @@ void Field::tryGenerateShips()
     }
 }
 
+//====================Bool checks====================//
 bool Field::canSpawnShipInLocation(const int shipX, const int shipY) const
 {
     int radius = 1;
@@ -103,6 +105,12 @@ bool Field::canShootAtLocation(int shootX, int shootY)
     return false;
 }
 
+bool Field::isAnyShipsLeft() const
+{
+    return shipsAmmount > 0;
+}
+
+//====================Getters====================//
 std::vector<std::vector<cell>> Field::getField() const
 {
     return field;
@@ -123,11 +131,7 @@ int Field::getWidth() const
     return width;
 }
 
-bool Field::isAnyShipsLeft() const
-{
-    return shipsAmmount > 0;
-}
-
+//====================Implementing shots====================//
 void Field::implementHitAtLocation(const int x, const int y)
 {
     smShipGotShot = false;
@@ -140,8 +144,3 @@ void Field::implementHitAtLocation(const int x, const int y)
 
     field[y][x].wasShot = true;
 }
-
-
-
-
-

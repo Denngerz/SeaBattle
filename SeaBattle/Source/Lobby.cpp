@@ -2,10 +2,13 @@
 #include <iostream>
 #include "Game.h"
 #include <fstream>
-
-#include "SeaBattleBot.h"
-#include "SeaBattlePlayer.h"
 #include "StatsPlayer.h"
+
+Lobby::Lobby()
+{
+    playerOne = std::make_shared<Player>();
+    playerTwo = std::make_shared<Player>();
+}
 
 void Lobby::initialize()
 {
@@ -13,82 +16,44 @@ void Lobby::initialize()
 
     initializePlayers();
 
-    if(chosenGamemode != GameMode::PVP)
+    if(playerOne->isBot || playerTwo->isBot)
     {
-        botDifficultySet = false;
         chooseBotDifficulty();
     }
+    return;
 }
 
-void Lobby::chooseGamemode()
+void Lobby::runGame()
 {
-    while(!gamemodeSet)
-    {
-        draw();
-        
-        int wantedGamemode = getWantedGamemode();
-        
-        setWantedGamemode(wantedGamemode);
-    }
+    std::unique_ptr<Game> game(createGame());
+
+    game->startRounds();
+
+    updatePlayersStats(game->didfirstPlayerWin(), game->ammountOfMoves, game->fieldSize);
+
+    return;
 }
 
+//=====================Player Initizalization=====================//
 void Lobby::initializePlayers()
 {
-    if(chosenGamemode == GameMode::PVP)
-    {
-        draw();
-        
-        firstPlayerName = choosePlayerName();
-
-        firstStatsPlayer = std::make_shared<StatsPlayer>(firstPlayerName, playersJson);
-        firstStatsPlayer->setStatsPlayer();
-        firstPlayerNameSet = true;
-        
-        draw();
-        
-        secondPlayerName = choosePlayerName();
-
-        secondStatsPlayer = std::make_shared<StatsPlayer>(secondPlayerName, playersJson);
-        secondStatsPlayer->setStatsPlayer();
-        secondPlayerNameSet = true;
-        
-        return;
-    }
-    if(chosenGamemode == GameMode::PVE)
-    {
-        draw();
-        
-        firstPlayerName = choosePlayerName();
-        
-        firstStatsPlayer = std::make_shared<StatsPlayer>(firstPlayerName, playersJson);
-        firstStatsPlayer->setStatsPlayer();
-        firstPlayerNameSet = true;
-        
-        secondPlayerName = "Bot1";
-        secondPlayerNameSet = true;
-        
-        return;
-    }
-    if(chosenGamemode == GameMode::EVE)
-    {
-        firstPlayerName = "Bot1";
-        firstPlayerNameSet = true;
-
-        secondPlayerName = "Bot2";
-        secondPlayerNameSet = true;
-    }
+    initializePlayer(playersJson, playerOne.get());
+    initializePlayer(playersJson, playerTwo.get());
 }
 
-void Lobby::chooseBotDifficulty()
+void Lobby::initializePlayer(const std::string playersJson, Player* player)
 {
-    while(!botDifficultySet)
+    drawNameChoose();
+    
+    player->name = choosePlayerName();
+
+    if(!player->isBot)
     {
-        draw();
-        
-        int wantedBotDifficulty = getWantedBotDifficulty();
-        
-        setWantedBotDifficulty(wantedBotDifficulty);
+        player->statsPlayer = std::make_shared<StatsPlayer>(player->name, playersJson);
+        player->statsPlayer->setStatsPlayer();
     }
+    
+    return;
 }
 
 std::string Lobby::choosePlayerName()
@@ -100,35 +65,36 @@ std::string Lobby::choosePlayerName()
     return playerName;
 }
 
-void Lobby::draw()
+//=====================Draw methods=====================//
+void Lobby::drawNameChoose()
 {
-    if(!gamemodeSet)
-    {
-        std::cout << "\nChoose Gamemode (1 - PVP, 2 - PVE, 3 - EVE): ";
-        return;
-    }
-    if(!firstPlayerNameSet)
-    {
-        std::cout << "\nChoose First Player Name: ";
-        return;
-    }
-    if(!secondPlayerNameSet)
-    {
-        std::cout << "\nChoose Second Player Name: ";
-    }
-    if(!botDifficultySet)
-    {
-        std::cout << "\nChoose Bot Difficulty (1 - EASY, 2 - NORMAL, 3 - HARD): ";
-    }
+    std::cout << "\nChoose Player Name: ";
+    return;
 }
 
-void Lobby::runGame()
+void Lobby::drawGamemodeChoose()
 {
-    Game* game = new Game(chosenGamemode, firstPlayerName, secondPlayerName, chosenBotDifficulty);
+    std::cout << "\nChoose Gamemode (1 - PVP, 2 - PVE, 3 - EVE): ";
+    return;
+}
 
-    game->startRounds();
+void Lobby::drawDifficultyChoose()
+{
+    std::cout << "\nChoose Bot Difficulty (1 - EASY, 2 - NORMAL, 3 - HARD): ";
+    return;
+}
 
-    updatePlayersStats(game->getWinner(), game->getLoser(), game->ammountOfMoves, game->fieldSize);
+//=====================Gamemode=====================//
+void Lobby::chooseGamemode()
+{
+    while(!gamemodeSet)
+    {
+        drawGamemodeChoose();
+        
+        int wantedGamemode = getWantedGamemode();
+        
+        setWantedGamemode(wantedGamemode);
+    }
 }
 
 void Lobby::setWantedGamemode(int wantedGamemode)
@@ -136,17 +102,20 @@ void Lobby::setWantedGamemode(int wantedGamemode)
     switch(wantedGamemode)
     {
         case 1:
-            chosenGamemode = GameMode::PVP;
+            playerOne->isBot = false;
+            playerTwo->isBot = false;
             gamemodeSet = true;
             break;
         
         case 2:
-            chosenGamemode = GameMode::PVE;
+            playerOne->isBot = false;
+            playerTwo->isBot = true;
             gamemodeSet = true;
             break;
         
         case 3:
-            chosenGamemode = GameMode::EVE;
+            playerOne->isBot = true;
+            playerTwo->isBot = true;
             gamemodeSet = true;
             break;
         
@@ -169,6 +138,19 @@ int Lobby::getWantedGamemode()
     }
 
     return wantedGamemode;
+}
+
+//=====================Bot Difficulty=====================//
+void Lobby::chooseBotDifficulty()
+{
+    while(!botDifficultySet)
+    {
+        drawDifficultyChoose();
+        
+        int wantedBotDifficulty = getWantedBotDifficulty();
+        
+        setWantedBotDifficulty(wantedBotDifficulty);
+    }
 }
 
 void Lobby::setWantedBotDifficulty(int wantedBotDifficulty)
@@ -211,26 +193,34 @@ int Lobby::getWantedBotDifficulty()
     return wantedBotDifficulty;
 }
 
-void Lobby::updatePlayersStats(SeaBattlePlayer* winner, SeaBattlePlayer* loser, int ammountOfMoves, int fieldSize)
+//=====================Player Stats update function=====================//
+void Lobby::updatePlayersStats(bool firstPlayerWon, int ammountOfMoves, int fieldSize)
 {
-    bool isWinnerBot = dynamic_cast<SeaBattleBot*>(winner) != nullptr;
-    bool isLoserBot = dynamic_cast<SeaBattleBot*>(loser) != nullptr;
+    if(!playerOne->isBot)
+    {
+        playerOne->statsPlayer->updatePlayerStats(firstPlayerWon, ammountOfMoves, defaultMMRBonus, fieldSize);
+    }
+    if(!playerTwo->isBot)
+    {
+        playerTwo->statsPlayer->updatePlayerStats(!firstPlayerWon, ammountOfMoves, defaultMMRBonus, fieldSize);
+    }
+    
+    return;
+}
 
-    if (!isWinnerBot && winner->username == firstStatsPlayer->username)
-    {
-        firstStatsPlayer->updatePlayerStats(true, ammountOfMoves, defaultMMRBonus, fieldSize);
-    }
-    if (!isWinnerBot && winner->username == secondStatsPlayer->username)
-    {
-        secondStatsPlayer->updatePlayerStats(true, ammountOfMoves, defaultMMRBonus, fieldSize);
-    }
+//=====================Create Game function=====================//
+Game* Lobby::createGame()
+{
+    bool showFirstPlayerField = playerOne->isBot || playerTwo->isBot;
+    bool showSecondPlayerField = playerOne->isBot;
 
-    if (!isLoserBot && loser->username == firstStatsPlayer->username)
-    {
-        firstStatsPlayer->updatePlayerStats(false, ammountOfMoves, defaultMMRBonus, fieldSize);
-    }
-    if (!isLoserBot && loser->username == secondStatsPlayer->username)
-    {
-        secondStatsPlayer->updatePlayerStats(false, ammountOfMoves, defaultMMRBonus, fieldSize);
-    }
+    return new Game(
+        playerOne->isBot, 
+        playerTwo->isBot, 
+        playerOne->name, 
+        playerTwo->name, 
+        chosenBotDifficulty, 
+        showFirstPlayerField, 
+        showSecondPlayerField
+    );
 }

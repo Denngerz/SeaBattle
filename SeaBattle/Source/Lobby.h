@@ -4,19 +4,20 @@
 #include <string>
 #include "GameEnums.h"
 
-class SeaBattlePlayer;
 class StatsPlayer;
+class Game;
+
+struct Player
+{
+    bool isBot;
+    std::shared_ptr<StatsPlayer> statsPlayer;
+    std::string name;
+};
 
 class Lobby
 {
 public:
-    GameMode chosenGamemode;
-    
-    BotDifficulty chosenBotDifficulty;
-
-    std::string firstPlayerName;
-
-    std::string secondPlayerName;
+    Lobby();
 
     void initialize();
 
@@ -28,34 +29,46 @@ public:
 
     std::string choosePlayerName();
 
-    void draw();
-
     void runGame();
 
 private:
+    //=====Players in lobby=====//
+    std::shared_ptr<Player> playerOne;
+
+    std::shared_ptr<Player> playerTwo;
+
+    void initializePlayer(const std::string playersJson, Player* player);
+
+    void updatePlayersStats(bool firstPlayerWon, int ammountOfMoves, int fieldSize);
+    
+    //=====Draw Methods=====//
+    void drawNameChoose();
+
+    void drawGamemodeChoose();
+
+    void drawDifficultyChoose();
+
+    //=====Players stats File=====//
     const std::string playersJson = "players.json";
 
+    //=====Gamemode=====//
     bool gamemodeSet = false;
-
-    bool firstPlayerNameSet = false;
-
-    bool secondPlayerNameSet = false;
 
     void setWantedGamemode(int wantedGamemode);
 
     int getWantedGamemode();
 
+    //=====Bot Difficulty=====//
+    BotDifficulty chosenBotDifficulty;
+
     void setWantedBotDifficulty(int wantedBotDifficulty);
 
     int getWantedBotDifficulty();
 
-    bool botDifficultySet = true;
+    bool botDifficultySet = false;
 
-    std::shared_ptr<StatsPlayer> firstStatsPlayer;
-
-    std::shared_ptr<StatsPlayer> secondStatsPlayer;
-
-    void updatePlayersStats(SeaBattlePlayer* winner, SeaBattlePlayer* loser, int ammountOfMoves, int fieldSize);
-
+    //====Other====//
     int defaultMMRBonus = 20;
+    
+    Game* createGame();
 };

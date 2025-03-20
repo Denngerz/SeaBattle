@@ -1,94 +1,60 @@
 ﻿#include "SeaBattleBot.h"
+#include <tuple>
 #include "Field.h"
 
 SeaBattleBot::SeaBattleBot(unsigned int seedValue, int field_height, int field_width, std::string name, BotDifficulty difficulty): SeaBattlePlayer(seedValue, field_height, field_width, name)
 {
     currentDifficulty = difficulty;
-    setHitChanceBasedOnDifficulty();
 }
 
-void SeaBattleBot::generateShootLocations()
+std::tuple<int, int> SeaBattleBot::generateShootLocations()
 {
-    bool didShoot = false;
+    do
+    {
+        shootX = rand() % getFieldWidth();
+        shootY = rand() % getFieldHeight();
+    }
+    while (wasShotBefore(shootX, shootY));
     
-    if(rand() % 101 <= hitChance)
+    if (currentDifficulty != BotDifficulty::NORMAL)
     {
-        for(int i = 0; i < getFieldHeight(); i++)
+        bool shouldSwitchLocation = (rand() % 101) <= switchChance;
+        
+        if (shouldSwitchLocation)
         {
-            for(int j = 0; j < getFieldWidth(); j++)
-            {
-                std::vector<std::vector<cell>> cells = enemyField->getField();
-                if(cells[i][j].hasShip && !cells[i][j].wasShot)
-                {
-                    shootX = j;
-                    shootY = i;
-                    didShoot = true;
-                    break;
-                }
-            }
-            if(didShoot)
-            {
-                break;
-            }
+            bool shouldContainShip = (currentDifficulty == BotDifficulty::HARD);
+            std::tie(shootX, shootY) = findNewLocation(shouldContainShip);
         }
     }
-    else
-    {
-        for(int i = 0; i < getFieldHeight(); i++)
-        {
-            for(int j = 0; j < getFieldWidth(); j++)
-            {
-                std::vector<std::vector<cell>> cells = enemyField->getField();
-                if(!cells[i][j].hasShip && !cells[i][j].wasShot)
-                {
-                    shootX = j;
-                    shootY = i;
-                    didShoot = true;
-                    break;
-                }
-            }
-            if(didShoot)
-            {
-                break;
-            }
-        }
-    }
-}
+    
+    shotLocations.emplace_back(shootX, shootY);
 
-int SeaBattleBot::getShootX() const
-{
-    return shootX;
-}
-
-int SeaBattleBot::getShootY() const
-{
-    return shootY;
-}
-
-void SeaBattleBot::setHitChanceBasedOnDifficulty()
-{
-    switch (currentDifficulty)
-    {
-    case BotDifficulty::EASY:
-        hitChance = 10;
-        break;
-        
-    case BotDifficulty::NORMAL:
-        hitChance = 15;
-        break;
-        
-    case BotDifficulty::HARD:
-        hitChance = 20;
-        break;
-        
-    default:
-        break;
-    }
+    return std::make_tuple(shootX, shootY);
 }
 
 void SeaBattleBot::setEnemyField(Field* shootingField)
 {
     enemyField = shootingField;
 }
+
+bool SeaBattleBot::wasShotBefore(int x, int y) const{
+    return std::find(shotLocations.begin(), shotLocations.end(), std::make_pair(x, y)) != shotLocations.end();
+}
+
+std::tuple<int, int> SeaBattleBot::findNewLocation(bool shouldContainShip)
+{
+    int x;
+    int y;
+
+    do
+    {
+        x = rand() % getFieldWidth();
+        y = rand() % getFieldHeight();
+    }
+    while (enemyField->getCellAt(x, y).hasShip != shouldContainShip);
+
+    return std::make_tuple(x, y);
+}
+
 
 
