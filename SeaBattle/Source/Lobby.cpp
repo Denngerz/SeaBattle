@@ -37,21 +37,27 @@ void Lobby::runGame()
 //=====================Player Initizalization=====================//
 void Lobby::initializePlayers()
 {
+    botAmmount = 0;
     initializePlayer(playersJson, playerOne.get());
     initializePlayer(playersJson, playerTwo.get());
 }
 
 void Lobby::initializePlayer(const std::string playersJson, Player* player)
 {
-    drawNameChoose();
-    
-    player->name = choosePlayerName();
-
     if(!player->isBot)
     {
-        player->statsPlayer = std::make_shared<StatsPlayer>(player->name, playersJson);
-        player->statsPlayer->setStatsPlayer();
+        drawNameChoose();
+    
+        player->name = choosePlayerName();
     }
+    else
+    {
+        botAmmount++;
+        player->name = "Bot" + std::to_string(botAmmount);
+    }
+    
+    player->statsPlayer = std::make_shared<StatsPlayer>(player->name, playersJson);
+    player->statsPlayer->setStatsPlayer();
     
     return;
 }
@@ -196,14 +202,11 @@ int Lobby::getWantedBotDifficulty()
 //=====================Player Stats update function=====================//
 void Lobby::updatePlayersStats(bool firstPlayerWon, int ammountOfMoves, int fieldSize)
 {
-    if(!playerOne->isBot)
-    {
-        playerOne->statsPlayer->updatePlayerStats(firstPlayerWon, ammountOfMoves, defaultMMRBonus, fieldSize);
-    }
-    if(!playerTwo->isBot)
-    {
-        playerTwo->statsPlayer->updatePlayerStats(!firstPlayerWon, ammountOfMoves, defaultMMRBonus, fieldSize);
-    }
+    std::unique_ptr<StatsPlayer> tempStatsPlayer = std::make_unique<StatsPlayer>(*playerOne->statsPlayer);
+    
+    playerOne->statsPlayer->updatePlayerStats(firstPlayerWon, ammountOfMoves, defaultMMRBonus, fieldSize, playerTwo->statsPlayer.get());
+   
+    playerTwo->statsPlayer->updatePlayerStats(!firstPlayerWon, ammountOfMoves, defaultMMRBonus, fieldSize, tempStatsPlayer.get());
     
     return;
 }

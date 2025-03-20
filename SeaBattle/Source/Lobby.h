@@ -71,4 +71,6 @@ private:
     int defaultMMRBonus = 20;
     
     Game* createGame();
+
+    int botAmmount = 0;
 };

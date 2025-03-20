@@ -9,7 +9,7 @@ public:
     
     std::string username;
     
-    int mmr = 0;
+    int mmr = 1;
     
     int won = 0;
     
@@ -23,7 +23,7 @@ public:
 
     void setStatsPlayer();
 
-    void updatePlayerStats(bool didWin, int ammountOfMoves = 0, int defaultMMRBonus = 20, int fieldSize = 100);
+    void updatePlayerStats(bool didWin, int ammountOfMoves, int defaultMMRBonus, int fieldSize, StatsPlayer* enemyPlayer);
 
 private:
     bool playersFileExits();
