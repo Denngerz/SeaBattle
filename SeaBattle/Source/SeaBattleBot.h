@@ -1,4 +1,6 @@
 ﻿#pragma once
+
+#include <set>
 #include "SeaBattlePlayer.h"
 #include "GameEnums.h"
 
@@ -17,7 +19,7 @@ private:
     //==============Field==============//
     int shootX, shootY;
 
-    std::vector<std::pair<int, int>> shotLocations;
+    std::set<std::pair<int, int>> shotLocations;
 
     bool wasShotBefore(int x, int y) const;
     

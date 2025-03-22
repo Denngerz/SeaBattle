@@ -42,7 +42,7 @@ int SeaBattlePlayer::getFieldWidth() const
     return field->getWidth();
 }
 
-std::vector<std::vector<cell>> SeaBattlePlayer::getFieldVector() const
+std::vector<std::vector<Cell>> SeaBattlePlayer::getFieldVector() const
 {
     return field->getField();
 }

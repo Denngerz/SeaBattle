@@ -9,7 +9,7 @@ class SeaBattlePlayer;
 
 class Field;
 
-struct cell;
+struct Cell;
 
 class Game
 {
@@ -21,15 +21,10 @@ public:
     bool isRoundOver();
     void getInput();
     void generate();
-    void initialize();
 
     void changeActivePlayer();
     void draw();
     bool didfirstPlayerWin();
-
-    int fieldSize;
-
-    int ammountOfMoves = 0;
     
 private:
     //=====================Players, bots and their fields=====================//
@@ -62,8 +57,12 @@ private:
     void drawWinner(SeaBattlePlayer* winner);
 
     void drawField();
+    
+    void drawVisibleCell(Cell& cell);
 
-    void drawCell(cell cell, bool isVisible);
+    void drawUnvisibleCell(Cell& cell);
+
+    void drawCell(Cell cell, bool isVisible);
 
     //=====================Game states=====================//
     bool activePlayerShootsAgain = false;

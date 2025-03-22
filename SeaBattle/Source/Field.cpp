@@ -15,7 +15,7 @@ void Field::generate()
 
 void Field::generateField()
 {
-    field.resize(height, std::vector<cell>(width));
+    field.resize(height, std::vector<Cell>(width));
 }
 
 
@@ -111,12 +111,12 @@ bool Field::isAnyShipsLeft() const
 }
 
 //====================Getters====================//
-std::vector<std::vector<cell>> Field::getField() const
+std::vector<std::vector<Cell>> Field::getField() const
 {
     return field;
 }
 
-cell Field::getCellAt(int x, int y) const
+Cell Field::getCellAt(int x, int y) const
 {
     return field[y][x];
 }

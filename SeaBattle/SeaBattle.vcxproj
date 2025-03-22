@@ -307,6 +307,7 @@
       <LinkCompiled>true</LinkCompiled>
       <AdditionalIncludeDirectories>;C:\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="Source\GameSession.cpp" />
     <ClCompile Include="Source\Lobby.cpp">
       <AssemblerOutput>NoListing</AssemblerOutput>
       <AssemblerListingLocation>x64\Release\</AssemblerListingLocation>
@@ -383,6 +384,7 @@
       <LinkCompiled>true</LinkCompiled>
       <AdditionalIncludeDirectories>;C:\vcpkg\installed\x64-windows\include</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="Source\MMRService.cpp" />
     <ClCompile Include="Source\SeaBattleBot.cpp">
       <AssemblerOutput>NoListing</AssemblerOutput>
       <AssemblerListingLocation>x64\Release\</AssemblerListingLocation>
@@ -616,7 +618,9 @@
     <ClInclude Include="Source\Field.h" />
     <ClInclude Include="Source\Game.h" />
     <ClInclude Include="Source\GameEnums.h" />
+    <ClInclude Include="Source\GameSession.h" />
     <ClInclude Include="Source\Lobby.h" />
+    <ClInclude Include="Source\MMRService.h" />
     <ClInclude Include="Source\SeaBattleBot.h" />
     <ClInclude Include="Source\SeaBattlePlayer.h" />
     <ClInclude Include="Source\StatsPlayer.h" />

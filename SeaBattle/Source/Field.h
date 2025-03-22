@@ -2,7 +2,7 @@
 
 #include <vector>
 
-struct cell {
+struct Cell {
     bool hasShip;
     bool wasShot;
 };
@@ -25,9 +25,9 @@ public:
 
     //========Getters========//
 
-    std::vector<std::vector<cell>> getField() const;
+    std::vector<std::vector<Cell>> getField() const;
 
-    cell getCellAt(int x, int y) const;
+    Cell getCellAt(int x, int y) const;
 
     int getHeight() const;
 
@@ -38,7 +38,7 @@ public:
     
 private:
     //=========Field vector=========//
-    std::vector<std::vector<cell>> field;
+    std::vector<std::vector<Cell>> field;
 
     //=========Field settings=========//
     int initialShipsAmmount = 10;

@@ -67,8 +67,6 @@ void Game::logic()
     {
         activePlayerShootsAgain = true;
     }
-
-    ammountOfMoves++;
 }
 
 //=====================Input=====================//
@@ -138,8 +136,6 @@ void Game::generatePlayersFields()
     playerTwo->generateBattleField();
 
     playerTwoField = playerTwo->field.get();
-
-    fieldSize = playerTwo->field.get()->getHeight() * playerTwo->field.get()->getWidth();
 }
 
 void Game::changeActivePlayer()
@@ -258,44 +254,55 @@ void Game::drawField()
     }
 }
 
-void Game::drawCell(cell cell, bool isVisible)
+void Game::drawVisibleCell(Cell& cell)
 {
-    if(isVisible)
+    if(!cell.hasShip && !cell.wasShot)
     {
-        if(!cell.hasShip && !cell.wasShot)
-        {
-            std::cout << waterSymbol;
-            return;
-        }
-        if(cell.hasShip&& !cell.wasShot)
-        {
-            std::cout << shipSymbol;
-            return;
-        }
-        if(!cell.hasShip&& cell.wasShot)
-        {
-            std::cout << destroyedWaterSymbol;
-            return;
-        }
-        if(cell.hasShip&& cell.wasShot)
-        {
-            std::cout << destroyedShipSymbol;
-        }
+        std::cout << waterSymbol;
+        return;
+    }
+    if(cell.hasShip&& !cell.wasShot)
+    {
+        std::cout << shipSymbol;
+        return;
+    }
+    if(!cell.hasShip&& cell.wasShot)
+    {
+        std::cout << destroyedWaterSymbol;
+        return;
+    }
+    if(cell.hasShip&& cell.wasShot)
+    {
+        std::cout << destroyedShipSymbol;
+    }
+}
+
+void Game::drawUnvisibleCell(Cell& cell)
+{
+    if(cell.hasShip && cell.wasShot)
+    {
+        std::cout <<  destroyedShipSymbol;
+    }
+    else if(!cell.hasShip&& cell.wasShot)
+    {
+        std::cout << destroyedWaterSymbol;
     }
     else
     {
-        if(cell.hasShip && cell.wasShot)
-        {
-            std::cout <<  destroyedShipSymbol;
-        }
-        else if(!cell.hasShip&& cell.wasShot)
-        {
-            std::cout << destroyedWaterSymbol;
-        }
-        else
-        {
-            std::cout << waterSymbol;
-        }
+        std::cout << waterSymbol;
+    }
+}
+
+
+void Game::drawCell(Cell cell, bool isVisible)
+{
+    if(isVisible)
+    {
+        drawVisibleCell(cell);
+    }
+    else
+    {
+        drawUnvisibleCell(cell);
     }
 }
 

@@ -5,7 +5,7 @@
 #include "GameEnums.h"
 
 class StatsPlayer;
-class Game;
+class GameSession;
 
 struct Player
 {
@@ -39,7 +39,7 @@ private:
 
     void initializePlayer(const std::string playersJson, Player* player);
 
-    void updatePlayersStats(bool firstPlayerWon, int ammountOfMoves, int fieldSize);
+    void updatePlayersStats(bool firstPlayerWon);
     
     //=====Draw Methods=====//
     void drawNameChoose();
@@ -70,7 +70,7 @@ private:
     //====Other====//
     int defaultMMRBonus = 20;
     
-    Game* createGame();
+    GameSession* createGameSession();
 
     int botAmmount = 0;
 };

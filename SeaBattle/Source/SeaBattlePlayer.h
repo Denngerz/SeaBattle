@@ -5,7 +5,7 @@
 #include <vector>
 
 class Field;
-struct cell;
+struct Cell;
 
 class SeaBattlePlayer
 {
@@ -16,15 +16,7 @@ public:
     virtual ~SeaBattlePlayer() {}
 
     std::string username;
-
-    int mmr;
-
-    int won;
-
-    int lost;
-
-    double winrate;
-
+    
     std::unique_ptr<Field> field;
 
     void generateBattleField();
@@ -41,5 +33,5 @@ public:
 
     int getFieldWidth() const;
 
-    std::vector<std::vector<cell>> getFieldVector() const;
+    std::vector<std::vector<Cell>> getFieldVector() const;
 };

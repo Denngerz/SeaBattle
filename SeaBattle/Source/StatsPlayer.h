@@ -23,7 +23,7 @@ public:
 
     void setStatsPlayer();
 
-    void updatePlayerStats(bool didWin, int ammountOfMoves, int defaultMMRBonus, int fieldSize, StatsPlayer* enemyPlayer);
+    void saveCurrentStats();
 
 private:
     bool playersFileExits();

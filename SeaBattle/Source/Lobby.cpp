@@ -1,8 +1,10 @@
 ﻿#include "Lobby.h"
 #include <iostream>
-#include "Game.h"
 #include <fstream>
+
+#include "GameSession.h"
 #include "StatsPlayer.h"
+#include "MMRService.h"
 
 Lobby::Lobby()
 {
@@ -20,18 +22,15 @@ void Lobby::initialize()
     {
         chooseBotDifficulty();
     }
-    return;
 }
 
 void Lobby::runGame()
 {
-    std::unique_ptr<Game> game(createGame());
+    GameSession* gameSession = createGameSession();
 
-    game->startRounds();
+    gameSession->runGameSession();
 
-    updatePlayersStats(game->didfirstPlayerWin(), game->ammountOfMoves, game->fieldSize);
-
-    return;
+    updatePlayersStats(gameSession->didFirstPlayerWinGameSession());
 }
 
 //=====================Player Initizalization=====================//
@@ -58,8 +57,6 @@ void Lobby::initializePlayer(const std::string playersJson, Player* player)
     
     player->statsPlayer = std::make_shared<StatsPlayer>(player->name, playersJson);
     player->statsPlayer->setStatsPlayer();
-    
-    return;
 }
 
 std::string Lobby::choosePlayerName()
@@ -75,19 +72,16 @@ std::string Lobby::choosePlayerName()
 void Lobby::drawNameChoose()
 {
     std::cout << "\nChoose Player Name: ";
-    return;
 }
 
 void Lobby::drawGamemodeChoose()
 {
     std::cout << "\nChoose Gamemode (1 - PVP, 2 - PVE, 3 - EVE): ";
-    return;
 }
 
 void Lobby::drawDifficultyChoose()
 {
     std::cout << "\nChoose Bot Difficulty (1 - EASY, 2 - NORMAL, 3 - HARD): ";
-    return;
 }
 
 //=====================Gamemode=====================//
@@ -200,24 +194,18 @@ int Lobby::getWantedBotDifficulty()
 }
 
 //=====================Player Stats update function=====================//
-void Lobby::updatePlayersStats(bool firstPlayerWon, int ammountOfMoves, int fieldSize)
+void Lobby::updatePlayersStats(bool firstPlayerWon)
 {
-    std::unique_ptr<StatsPlayer> tempStatsPlayer = std::make_unique<StatsPlayer>(*playerOne->statsPlayer);
-    
-    playerOne->statsPlayer->updatePlayerStats(firstPlayerWon, ammountOfMoves, defaultMMRBonus, fieldSize, playerTwo->statsPlayer.get());
-   
-    playerTwo->statsPlayer->updatePlayerStats(!firstPlayerWon, ammountOfMoves, defaultMMRBonus, fieldSize, tempStatsPlayer.get());
-    
-    return;
+    MMRService::updatePlayer(playerOne->statsPlayer.get(), playerTwo->statsPlayer.get(), firstPlayerWon);
 }
 
 //=====================Create Game function=====================//
-Game* Lobby::createGame()
+GameSession* Lobby::createGameSession()
 {
     bool showFirstPlayerField = playerOne->isBot || playerTwo->isBot;
     bool showSecondPlayerField = playerOne->isBot;
 
-    return new Game(
+    return new GameSession(
         playerOne->isBot, 
         playerTwo->isBot, 
         playerOne->name, 

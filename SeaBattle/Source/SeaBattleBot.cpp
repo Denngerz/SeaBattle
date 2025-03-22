@@ -27,7 +27,7 @@ std::tuple<int, int> SeaBattleBot::generateShootLocations()
         }
     }
     
-    shotLocations.emplace_back(shootX, shootY);
+    shotLocations.insert(std::make_pair(shootX, shootY));
 
     return std::make_tuple(shootX, shootY);
 }
@@ -37,8 +37,8 @@ void SeaBattleBot::setEnemyField(Field* shootingField)
     enemyField = shootingField;
 }
 
-bool SeaBattleBot::wasShotBefore(int x, int y) const{
-    return std::find(shotLocations.begin(), shotLocations.end(), std::make_pair(x, y)) != shotLocations.end();
+bool SeaBattleBot::wasShotBefore(int x, int y) const {
+    return shotLocations.find(std::make_pair(x, y)) != shotLocations.end();
 }
 
 std::tuple<int, int> SeaBattleBot::findNewLocation(bool shouldContainShip)
